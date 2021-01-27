@@ -7,6 +7,10 @@ Author: Diego Bueno (ID: 23567850) / Isabelle Sypott (ID: 21963427 )
 e-mail: d.bueno.da.silva.10@student.scu.edu.au / i.sypott.10@student.scu.edu.au
 
 
+
+ it has been changed
+
+
 """
 
 ## importing the libraries required
@@ -73,8 +77,8 @@ print("\n")
 # Pre-processing
 ## Loading/Reading the required data for analysis & also preprocessing data.  
 ### Zoom range is randomly zooming into images, horizontal flip randomly flips half images horizontally, shear range randomly shears some images - helps give detail to images that are blurry or fragmented in some way
-x_trainNormalised = x_train(rescale = 1./255, shear_range = 0.1, zoom_range = 0.1,horizontal_flip = True)
-x_testNormalised = x_test(rescale = 1./255, shear_range = 0.1, zoom_range = 0.1,horizontal_flip = True)
+#x_trainNormalised = x_train(rescale = 1./255, shear_range = 0.1, zoom_range = 0.1,horizontal_flip = True)
+#x_testNormalised = x_test(rescale = 1./255, shear_range = 0.1, zoom_range = 0.1,horizontal_flip = True)
 
 
 
