@@ -126,9 +126,30 @@ model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accur
 ## validate
 model.fit(x_trainNormalised, y_trainCategorical, epochs=epochs, verbose=1)
 
-## evaluating
+## evaluating the accuracy using test data
 #loss_val, acc_val = model.evaluate(x_testNormalised, y_testCategorical)
 #print('Accuracy is: ', acc_val)
+
+## evaluating the accuracy another way to ensure its accurate - with a for loop
+
+#Rec_Acc = 0
+
+#for i in range(len(y_test)):
+
+#  if (y_predicted[i] == y_test[i]):
+
+    #Rec_Acc = Rec_Acc +1
+
+  # else:
+
+  #   print(y_predicted[i][0])   
+
+
+#Rec_Acc = Rec_Acc/len(y_test)*100
+
+#print("Recognition Accuracy: ",Rec_Acc,"%")
+
+
 
 # Predicting aleatory sample from 0 to 2000 (test set has 2000 instances)
 someSample = random.randint(0, (len(data[b'data'])*test_size) - 1 ) 
