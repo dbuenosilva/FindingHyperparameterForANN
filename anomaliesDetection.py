@@ -23,6 +23,7 @@ from tensorflow.keras.utils import to_categorical
 from sklearn.model_selection import train_test_split #used to split data into training and test segments
 from keras.callbacks import EarlyStopping, ModelCheckpoint 
 from tensorflow import keras #keras is the api that provides functionality to work with tensorflow
+from keras.preprocessing.image import ImageDataGenerator
 
 
 
@@ -34,7 +35,7 @@ def read(file_name):
 
 
 ## Loading data from assignment 2 challenge
-path = "/Users/diego/OneDrive - Gwaya do Brasil/SCU/Year1/Session3/AIT91001 Computational Intelligence and Machine Learning/assigment02/"
+path = "C:/Users/russe/Downloads/"
 
 data = read( path + 'images/data_batch_1') # Let's see next week further batch files...
 meta = read( path + 'images/batches.meta')
@@ -65,7 +66,10 @@ meta = read( path + 'images/batches.meta')
 test_size = 0.2
 epochs    = 30
 
-[x_train, x_test, y_train, y_test] = train_test_split(data[b'data'], data[b'labels'], test_size = test_size, random_state= 42 )
+X = data[b'data']
+y =  data[b'labels']
+
+[x_train, x_test, y_train, y_test] = train_test_split(X, y, test_size = test_size, random_state= 42 )
     
 ## Shape of original data
 print("x_train initial shape:  ", x_train.shape)
@@ -80,7 +84,14 @@ print("\n")
 #x_trainNormalised = x_train(rescale = 1./255, shear_range = 0.1, zoom_range = 0.1,horizontal_flip = True)
 #x_testNormalised = x_test(rescale = 1./255, shear_range = 0.1, zoom_range = 0.1,horizontal_flip = True)
 
-#
+#x_trainNormalised = ImageDataGenerator(rescale = 1./255, shear_range = 0.1, zoom_range = 0.1,horizontal_flip = True)
+#x_testNormalised = ImageDataGenerator(rescale = 1./255, shear_range = 0.1, zoom_range = 0.1,horizontal_flip = True)
+
+
+# Pre-processing
+x_trainNormalised = x_train / 255.0
+x_testNormalised = x_test / 255.0
+
 
 ## Changing the shape of INPUT data
 nInstancesTrain  = x_trainNormalised.shape[0]
@@ -88,6 +99,7 @@ nInstancesTest   = x_testNormalised.shape[0]
 nRowns           = 32 
 nColumns         = 32
 nChannels        = 3  # 3 channels denotes one red, green and blue (RGB image)
+
 
 #x_train = x_trainNormalised.reshape(8000, 32, 32, 3)
 x_trainNormalised = x_trainNormalised.reshape(nInstancesTrain, nRowns, nColumns, nChannels) 
@@ -108,15 +120,15 @@ print("y_testCategorical shape: ", y_testCategorical.shape)
 
 # designing the Convolutional Neural Network 
 model = tf.keras.models.Sequential()
-
+                                                                                 #32    #32        #3           
 model.add(tf.keras.layers.Conv2D(filters=32, kernel_size=(3,3), input_shape = (nRowns, nColumns, nChannels), activation='relu')) #layer 1
 
 # Size of Pooling of 2x2 is default for images
 model.add(tf.keras.layers.MaxPooling2D(pool_size = (2, 2)))
 model.add(tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), activation='relu')) # layer 2
-model.add(tf.keras.layers.MaxPool2D(pool_size = (2,2)))
+model.add(tf.keras.layers.MaxPool2D(pool_size = (3,3)))
 
-#model.add(tf.keras.layers.Dropout(0.25))
+model.add(tf.keras.layers.Dropout(0.25))
 
 # Classifing by Fully Connect Neural Network
 model.add(tf.keras.layers.Flatten())
@@ -128,11 +140,11 @@ model.add(tf.keras.layers.Dense(10, activation='softmax'))
 model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
 
 ## validate
-model.fit(x_trainNormalised, y_trainCategorical, epochs=epochs, verbose=1)
+model.fit(x_trainNormalised, y_trainCategorical, epochs=epochs, batch_size=32,  verbose=1)
 
 ## evaluating the accuracy using test data
-#loss_val, acc_val = model.evaluate(x_testNormalised, y_testCategorical)
-#print('Accuracy is: ', acc_val)
+loss_val, acc_val = model.evaluate(x_testNormalised, y_testCategorical)
+print('Accuracy is: ', acc_val)
 
 ## evaluating the accuracy another way to ensure its accurate - with a for loop
 
