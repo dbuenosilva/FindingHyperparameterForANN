@@ -80,7 +80,7 @@ print("\n")
 #x_trainNormalised = x_train(rescale = 1./255, shear_range = 0.1, zoom_range = 0.1,horizontal_flip = True)
 #x_testNormalised = x_test(rescale = 1./255, shear_range = 0.1, zoom_range = 0.1,horizontal_flip = True)
 
-
+#
 
 ## Changing the shape of INPUT data
 nInstancesTrain  = x_trainNormalised.shape[0]
