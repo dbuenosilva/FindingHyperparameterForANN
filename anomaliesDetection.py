@@ -3,20 +3,26 @@
 """
 Anomalies Detection on images
 Date: 24/01/2021
-Author: Diego Bueno (ID: 23567850) / Isabelle Sypott (ID: )
-e-mail: d.bueno.da.silva.10@student.scu.edu.au / 
+Author: Diego Bueno (ID: 23567850) / Isabelle Sypott (ID: 21963427 )
+e-mail: d.bueno.da.silva.10@student.scu.edu.au / i.sypott.10@student.scu.edu.au
 
 
 """
 
+## importing the libraries required
 import numpy as np
 import pickle
 import random
 import matplotlib.pyplot as plt
 import tensorflow as tf # using Tensorflow 2.4
 from tensorflow.keras.utils import to_categorical
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split #used to split data into training and test segments
+from keras.callbacks import EarlyStopping, ModelCheckpoint 
+from tensorflow import keras #keras is the api that provides functionality to work with tensorflow
 
+
+
+## Importing the metadata files into python, reading each file by filename
 def read(file_name):
     with open(file_name, 'rb') as fo:
         dict = pickle.load(fo, encoding='bytes')
@@ -65,15 +71,19 @@ print("y_test initial shape:  ", len(y_test))
 print("\n")
 
 # Pre-processing
-x_trainNormalised = x_train / 255.0
-x_testNormalised = x_test / 255.0
+## Loading/Reading the required data for analysis & also preprocessing data.  
+### Zoom range is randomly zooming into images, horizontal flip randomly flips half images horizontally, shear range randomly shears some images - helps give detail to images that are blurry or fragmented in some way
+x_trainNormalised = x_train(rescale = 1./255, shear_range = 0.1, zoom_range = 0.1,horizontal_flip = True)
+x_testNormalised = x_test(rescale = 1./255, shear_range = 0.1, zoom_range = 0.1,horizontal_flip = True)
+
+
 
 ## Changing the shape of INPUT data
 nInstancesTrain  = x_trainNormalised.shape[0]
 nInstancesTest   = x_testNormalised.shape[0]
 nRowns           = 32 
 nColumns         = 32
-nChannels        = 3
+nChannels        = 3  # 3 channels denotes one red, green and blue (RGB image)
 
 #x_train = x_trainNormalised.reshape(8000, 32, 32, 3)
 x_trainNormalised = x_trainNormalised.reshape(nInstancesTrain, nRowns, nColumns, nChannels) 
@@ -81,11 +91,12 @@ x_trainNormalised = x_trainNormalised.reshape(nInstancesTrain, nRowns, nColumns,
 #x_test = x_test.x_testNormalised(2000, 32, 32, 3)
 x_testNormalised = x_testNormalised.reshape(nInstancesTest, nRowns, nColumns, nChannels)
 
-## Changing the shape of OUTPUT layer
+## Changing the shape of OUTPUT layer, also changing the labels of train and test into categorical data
 # It creates hot vectors for the classes like: [0. 0. 0. 1. 0. 0. 0. 0. 0. 0.]
 y_trainCategorical = to_categorical(y_train)
 y_testCategorical = to_categorical(y_test)
 
+# Checking that train and test data categorical and normalised are the correct shape for NN
 print("x_train normalised shape: ", x_trainNormalised.shape)
 print("x_test normalised shape: ", x_testNormalised.shape)
 print("y_trainCategorical shape: ", y_trainCategorical.shape)
@@ -94,9 +105,9 @@ print("y_testCategorical shape: ", y_testCategorical.shape)
 # designing the Convolutional Neural Network 
 model = tf.keras.models.Sequential()
 
-model.add(tf.keras.layers.Conv2D(filters=32, kernel_size=(3,3), input_shape = (nRowns, nColumns, nChannels), activation='relu'))
+model.add(tf.keras.layers.Conv2D(filters=32, kernel_size=(3,3), input_shape = (nRowns, nColumns, nChannels), activation='relu')) #layer 1
 
-# Size of Polloing of 2x2 is default for images
+# Size of Pooling of 2x2 is default for images
 model.add(tf.keras.layers.MaxPooling2D(pool_size = (2, 2)))
 model.add(tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), activation='relu')) # layer 2
 model.add(tf.keras.layers.MaxPool2D(pool_size = (2,2)))
@@ -109,7 +120,7 @@ model.add(tf.keras.layers.Dense(128, activation='relu'))
 #model.add(tf.keras.layers.Dropout(0.5))
 model.add(tf.keras.layers.Dense(10, activation='softmax'))
 
-## compile CNN => not spare_categorical_crossentropy because class are exclusives!
+## compile CNN => not sparse_categorical_crossentropy because classes are exclusives!
 model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
 
 ## validate
