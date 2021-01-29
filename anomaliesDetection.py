@@ -15,6 +15,7 @@ e-mail: d.bueno.da.silva.10@student.scu.edu.au / i.sypott.10@student.scu.edu.au
 
 ## importing the libraries required
 import numpy as np
+import pathlib
 import pickle
 import random
 import matplotlib.pyplot as plt
@@ -26,19 +27,45 @@ from tensorflow import keras #keras is the api that provides functionality to wo
 from keras.preprocessing.image import ImageDataGenerator
 
 
+""" Function read( )
 
-## Importing the metadata files into python, reading each file by filename
+    Read a pickle file format  
+    and return a Python dictionary with its content.
+
+    parameters: file_name
+
+    return: 
+        dict: a dictionary with the content encoding in bytes
+    
+"""
 def read(file_name):
     with open(file_name, 'rb') as fo:
         dict = pickle.load(fo, encoding='bytes')
     return dict
 
+# initialising variables
+epochs    = 2
+test_size = 0.2
+number_of_batch_files = 5
+data      = [] # array with all images read from batch files
+X         = [] # array with images data including channels (RGB)
+y         = [] # array with labels (index of category of images)
 
-## Loading data from assignment 2 challenge
-path = "C:/Users/russe/Downloads/"
+# Loading data 
+# images/ folder should be in the same location of the script
+# Getting the relative path of the file to avoid MacOS issues
+path = pathlib.Path(__file__).resolve().parent
+path = str(path) + "/"
 
-data = read( path + 'images/data_batch_1') # Let's see next week further batch files...
-meta = read( path + 'images/batches.meta')
+## data: data_batch_N dictionary
+    # { 
+    # b'labels': b'training batch 5 of 5' => title of dictionary
+    # b'labels': [1, 8... n ] => array 1D of size 10,000 labels
+    # b'data': array([[255, 252, 253,..] , [127, 126, 127, ...], [...]] ) => array of size 10,000 x 3,072 ( 1024 R + 1024 G + 1024 B )
+    # b'filenames': [b'compact_car_s_001706.png', b'icebreaker_s_001689.png',...] => array of size 10,000 with files names
+    # }    
+for n in range(1,number_of_batch_files + 1,1):
+    data = np.append(data, read( path + 'images/data_batch_' + str(n)) )
 
 ## meta dictionary:
     # {   
@@ -47,32 +74,25 @@ meta = read( path + 'images/batches.meta')
     # label_names': [b'airplane', b'automobile', b'bird', b'cat', b'deer', b'dog', b'frog', b'horse', b'ship', b'truck']
     # b'num_vis':    3072 ( 1024 R + 1024 G + 1024 B )   
     # } 
+meta = read( path + 'images/batches.meta')
 
-## data_batch_N dictionary
-    # { 
-    # b'labels': b'training batch 5 of 5' => title of dictionary
-    # b'labels': [1, 8... n ] => array 1D of size 10,000 labels
-    # b'data': array([[255, 252, 253,..] , [127, 126, 127, ...], [...]] ) => array of size 10,000 x 3,072 ( 1024 R + 1024 G + 1024 B )
-    # b'filenames': [b'compact_car_s_001706.png', b'icebreaker_s_001689.png',...] => array of size 10,000 with files names
-    # }
+# Unifying all images pixels values in unique array X
+for images in data:
+    if len(X) == 0:
+        X = images[b'data']
+    else:
+        X = np.concatenate((X, images[b'data']), axis=0) 
+    y = np.append(y, images[b'labels'] )
+    
+    
+print("\nX.shape with all images data: ", X.shape)
+print("\ny.shape with all images labels", y.shape)
 
-# Selecting 8000 instances for training set and 2000 for test set
-#x_train = data[b'data'][:8000] 
-#y_train = data[b'labels'][:8000] 
-# Selecting 2000 instances for testing set
-#x_test  = data[b'data'][8000:]
-#y_test  = data[b'labels'][8000:]
-
-test_size = 0.2
-epochs    = 30
-
-X = data[b'data']
-y =  data[b'labels']
-
+# Selecting 40000 instances for training set and 10000 for test set
 [x_train, x_test, y_train, y_test] = train_test_split(X, y, test_size = test_size, random_state= 42 )
     
 ## Shape of original data
-print("x_train initial shape:  ", x_train.shape)
+print("\n\nx_train initial shape:  ", x_train.shape)
 print("x_test initial shape:  ", x_test.shape)
 print("y_train initial shape:  ", len(y_train))
 print("y_test initial shape:  ", len(y_test))
@@ -87,11 +107,9 @@ print("\n")
 #x_trainNormalised = ImageDataGenerator(rescale = 1./255, shear_range = 0.1, zoom_range = 0.1,horizontal_flip = True)
 #x_testNormalised = ImageDataGenerator(rescale = 1./255, shear_range = 0.1, zoom_range = 0.1,horizontal_flip = True)
 
-
 # Pre-processing
 x_trainNormalised = x_train / 255.0
 x_testNormalised = x_test / 255.0
-
 
 ## Changing the shape of INPUT data
 nInstancesTrain  = x_trainNormalised.shape[0]
@@ -99,7 +117,6 @@ nInstancesTest   = x_testNormalised.shape[0]
 nRowns           = 32 
 nColumns         = 32
 nChannels        = 3  # 3 channels denotes one red, green and blue (RGB image)
-
 
 #x_train = x_trainNormalised.reshape(8000, 32, 32, 3)
 x_trainNormalised = x_trainNormalised.reshape(nInstancesTrain, nRowns, nColumns, nChannels) 
@@ -170,7 +187,7 @@ print('Accuracy is: ', acc_val)
 
 
 # Predicting aleatory sample from 0 to 2000 (test set has 2000 instances)
-someSample = random.randint(0, (len(data[b'data'])*test_size) - 1 ) 
+someSample = random.randint(0, (len(X)*test_size) - 1 ) 
 
 y_predicted = np.argmax(model.predict(x_testNormalised), axis=-1)
 #y_predicted = model.predict_classes(x_testNormalised) ==> DEPRECATED
