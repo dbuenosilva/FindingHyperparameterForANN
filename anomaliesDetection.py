@@ -118,6 +118,8 @@ print("x_test normalised shape: ", x_testNormalised.shape)
 print("y_trainCategorical shape: ", y_trainCategorical.shape)
 print("y_testCategorical shape: ", y_testCategorical.shape)
 
+
+
 # designing the Convolutional Neural Network 
 model = tf.keras.models.Sequential()
                                                                                  #32    #32        #3           
