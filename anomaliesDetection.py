@@ -8,7 +8,6 @@ e-mail: d.bueno.da.silva.10@student.scu.edu.au / i.sypott.10@student.scu.edu.au
 
 
 
- it has been changed
 
 
 """
@@ -27,12 +26,12 @@ from tensorflow import keras #keras is the api that provides functionality to wo
 from keras.preprocessing.image import ImageDataGenerator
 
 
-""" Function read( )
+""" Function read( file_name  )
 
     Read a pickle file format  
     and return a Python dictionary with its content.
 
-    parameters: file_name
+    parameters: (String) file_name
 
     return: 
         dict: a dictionary with the content encoding in bytes
@@ -43,8 +42,96 @@ def read(file_name):
         dict = pickle.load(fo, encoding='bytes')
     return dict
 
+
+
+""" Function getMyEarlyStop( myMonitor, myPatience,  myModelFile )
+
+    Set callback functions to early stop training, save the best model  
+    to disk and return it as array.
+
+    parameters: (String) myMonitor - metric name chose for monitor
+                   (int) myPatience - number of epochs to interrupt in case 
+                                      there is no longer improvement
+                (String) myModelFile - path including file name to save the 
+                                      best model.
+
+    return: 
+        callbacks: array with callback functions
+    
+"""
+def getMyEarlyStop( myMonitor = "", myPatience = 0, myModelFile = "" ):
+    
+    if not myMonitor or myPatience <= 0 or not myModelFile:
+        print("Invalid parameters!")
+        return []
+    
+    callbacks = [EarlyStopping(monitor=myMonitor, patience=myPatience, mode='auto'),
+    ModelCheckpoint(filepath=myModelFile, monitor=myMonitor, save_best_only=True, verbose=1)]
+    return callbacks                 
+
+
+
+""" Function getMyModel(layers<beta>, dropout)
+
+    Create a customised model according with parameters
+    and return a model object.
+
+    parameters: (Array) layers  - <beta>
+    
+                (Array) dropout - array with dropout rate after each layer
+                                  null for it does not apply droupout and float for applying.
+                                 Example: [null, null, null, 0.5, null, 0.25] will apply
+                                          0.5 dropout rate at 5th layer and 
+                                          0.25 dropout rate at 7th layer.
+                                          Invalid number layer is ignored.
+                                          OBS: it does not include input and output layers
+
+    return: 
+        model: a compiled model according to parameters.
+    
+"""
+
+def getMyModel( MyDropout = [] ):
+
+    # designing the Convolutional Neural Network 
+    model = tf.keras.models.Sequential()
+                                                                                   #32    #32        #3           
+    model.add(tf.keras.layers.Conv2D(filters=32, kernel_size=(3,3), input_shape = (nRowns, nColumns, nChannels), activation='relu')) #layer 1    
+    if len(MyDropout) > 0 and MyDropout[0]:
+        model.add(tf.keras.layers.Dropout(MyDropout[0]))    
+    
+    # Size of Pooling of 2x2 is default for images
+    model.add(tf.keras.layers.MaxPooling2D(pool_size = (2, 2)))
+    if len(MyDropout) > 1 and MyDropout[1]:
+        model.add(tf.keras.layers.Dropout(MyDropout[1]))
+
+    model.add(tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), activation='relu')) # layer 2
+    if len(MyDropout) > 2 and MyDropout[2]:
+        model.add(tf.keras.layers.Dropout(MyDropout[2]))
+
+    model.add(tf.keras.layers.MaxPool2D(pool_size = (3,3)))
+    if len(MyDropout) > 3 and MyDropout[3]:
+        model.add(tf.keras.layers.Dropout(MyDropout[3]))
+    
+    # Classifing by Fully Connect Neural Network
+    model.add(tf.keras.layers.Flatten())
+
+    model.add(tf.keras.layers.Dense(128, activation='relu'))
+    if len(MyDropout) > 4 and MyDropout[4]:
+        model.add(tf.keras.layers.Dropout(MyDropout[4]))
+    
+    model.add(tf.keras.layers.Dense(10, activation='softmax'))
+    
+    ## compile CNN => not sparse_categorical_crossentropy because classes are exclusives!
+    model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
+
+    return model
+
+
+
+
 # initialising variables
-epochs    = 2
+epochs    = 30
 test_size = 0.2
 number_of_batch_files = 5
 data      = [] # array with all images read from batch files
@@ -83,8 +170,7 @@ for images in data:
     else:
         X = np.concatenate((X, images[b'data']), axis=0) 
     y = np.append(y, images[b'labels'] )
-    
-    
+        
 print("\nX.shape with all images data: ", X.shape)
 print("\ny.shape with all images labels", y.shape)
 
@@ -135,59 +221,47 @@ print("x_test normalised shape: ", x_testNormalised.shape)
 print("y_trainCategorical shape: ", y_trainCategorical.shape)
 print("y_testCategorical shape: ", y_testCategorical.shape)
 
-# designing the Convolutional Neural Network 
-model = tf.keras.models.Sequential()
-                                                                                 #32    #32        #3           
-model.add(tf.keras.layers.Conv2D(filters=32, kernel_size=(3,3), input_shape = (nRowns, nColumns, nChannels), activation='relu')) #layer 1
 
-# Size of Pooling of 2x2 is default for images
-model.add(tf.keras.layers.MaxPooling2D(pool_size = (2, 2)))
-model.add(tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), activation='relu')) # layer 2
-model.add(tf.keras.layers.MaxPool2D(pool_size = (3,3)))
+## PENDIND: test if different model can be load and train with another number of layers, etc
+#MyModel = keras.models.load_model(myModel)
 
-model.add(tf.keras.layers.Dropout(0.25))
+"""  DROPOUT HINTS:
+In practice, you can usually apply dropout only to the neurons in the top one to three layers (excluding the output layer).
+(Aurelien pag. 481)
 
-# Classifing by Fully Connect Neural Network
-model.add(tf.keras.layers.Flatten())
-model.add(tf.keras.layers.Dense(128, activation='relu'))
-#model.add(tf.keras.layers.Dropout(0.5))
-model.add(tf.keras.layers.Dense(10, activation='softmax'))
+In the simplest case, each unit is retained with a fixed probability p 
+independent of other units, where p can be chosen using a validation 
+set or can simply be set at 0.5, which seems to be close to optimal for 
+a wide range of networks and tasks. For the input units, however, 
+the optimal probability of retention is usually closer to 1 than to 0.5.
+(Dropout: A Simple Way to Prevent Neural Networks from Overfitting, 2014.)
+"""
+#                      CNN  CNN  CNN  CNN   FNN
+myModel = getMyModel( [None, None, None, None, None] )
 
-## compile CNN => not sparse_categorical_crossentropy because classes are exclusives!
-model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
+early_stop = getMyEarlyStop( myMonitor = "accuracy", myPatience = 2, myModelFile = path + "anomaliesDetectionModel.h5" )
 
 ## validate
-model.fit(x_trainNormalised, y_trainCategorical, epochs=epochs, batch_size=32,  verbose=1)
+myModel.fit(x_trainNormalised, y_trainCategorical, epochs=epochs, batch_size=32,  verbose=1, callbacks = early_stop)
 
 ## evaluating the accuracy using test data
-loss_val, acc_val = model.evaluate(x_testNormalised, y_testCategorical)
+loss_val, acc_val = myModel.evaluate(x_testNormalised, y_testCategorical)
 print('Accuracy is: ', acc_val)
 
 ## evaluating the accuracy another way to ensure its accurate - with a for loop
-
 #Rec_Acc = 0
-
 #for i in range(len(y_test)):
-
 #  if (y_predicted[i] == y_test[i]):
-
     #Rec_Acc = Rec_Acc +1
-
   # else:
-
   #   print(y_predicted[i][0])   
-
-
 #Rec_Acc = Rec_Acc/len(y_test)*100
-
 #print("Recognition Accuracy: ",Rec_Acc,"%")
-
-
 
 # Predicting aleatory sample from 0 to 2000 (test set has 2000 instances)
 someSample = random.randint(0, (len(X)*test_size) - 1 ) 
 
-y_predicted = np.argmax(model.predict(x_testNormalised), axis=-1)
+y_predicted = np.argmax(myModel.predict(x_testNormalised), axis=-1)
 #y_predicted = model.predict_classes(x_testNormalised) ==> DEPRECATED
 
 print("y_predicted for test dataset index ",someSample," is ", meta[b'label_names'][y_predicted[someSample]])
