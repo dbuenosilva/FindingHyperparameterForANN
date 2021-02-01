@@ -45,6 +45,92 @@ def read(file_name):
     return dict
 
 
+
+""" Function getMyEarlyStop( myMonitor, myPatience,  myModelFile )
+
+    Set callback functions to early stop training, save the best model  
+    to disk and return it as array.
+
+    parameters: (String) myMonitor - metric name chose for monitor
+                   (int) myPatience - number of epochs to interrupt in case 
+                                      there is no longer improvement
+                (String) myModelFile - path including file name to save the 
+                                      best model.
+
+    return: 
+        callbacks: array with callback functions
+    
+"""
+def getMyEarlyStop( myMonitor = "", myPatience = 0, myModelFile = "" ):
+    
+    if not myMonitor or myPatience <= 0 or not myModelFile:
+        print("Invalid parameters!")
+        return []
+    
+    callbacks = [EarlyStopping(monitor=myMonitor, patience=myPatience, mode='auto'),
+    ModelCheckpoint(filepath=myModelFile, monitor=myMonitor, save_best_only=True, verbose=1)]
+    return callbacks                 
+
+
+
+""" Function getMyModel(layers<beta>, dropout)
+
+    Create a customised model according with parameters
+    and return a model object.
+
+    parameters: (Array) layers  - <beta>
+    
+                (Array) dropout - array with dropout rate after each layer
+                                  null for it does not apply droupout and float for applying.
+                                 Example: [null, null, null, 0.5, null, 0.25] will apply
+                                          0.5 dropout rate at 5th layer and 
+                                          0.25 dropout rate at 7th layer.
+                                          Invalid number layer is ignored.
+                                          OBS: it does not include input and output layers
+
+    return: 
+        model: a compiled model according to parameters.
+    
+"""
+
+def getMyModel( MyDropout = [] ):
+
+    # designing the Convolutional Neural Network 
+    model = tf.keras.models.Sequential()
+    
+    # CNN
+                                                                                   #32    #32        #3           
+    model.add(tf.keras.layers.Conv2D(filters=32, kernel_size=(3,3), input_shape = (nRowns, nColumns, nChannels), activation='relu')) #layer 1    
+    if len(MyDropout) > 0 and MyDropout[0]:
+        model.add(tf.keras.layers.Dropout(MyDropout[0]))    
+    
+    # Size of Pooling of 2x2 is default for images
+    model.add(tf.keras.layers.MaxPooling2D(pool_size = (2, 2)))
+    if len(MyDropout) > 1 and MyDropout[1]:
+        model.add(tf.keras.layers.Dropout(MyDropout[1]))
+
+    model.add(tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), activation='relu')) # layer 2
+    if len(MyDropout) > 2 and MyDropout[2]:
+        model.add(tf.keras.layers.Dropout(MyDropout[2]))
+
+    model.add(tf.keras.layers.MaxPool2D(pool_size = (3,3)))
+    if len(MyDropout) > 3 and MyDropout[3]:
+        model.add(tf.keras.layers.Dropout(MyDropout[3]))
+    
+    # Classifing by Fully Connect Neural Network
+    model.add(tf.keras.layers.Flatten())
+
+    model.add(tf.keras.layers.Dense(128, activation='relu'))
+    if len(MyDropout) > 4 and MyDropout[4]:
+        model.add(tf.keras.layers.Dropout(MyDropout[4]))
+    
+    model.add(tf.keras.layers.Dense(10, activation='softmax'))
+    
+    ## compile CNN => not sparse_categorical_crossentropy because classes are exclusives!
+    model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy", f1_m, precision_m, recall_m])
+
+    return model
+
 """ Function to get formuals for precision, recall and f1 values"""
 
 def recall_m(y_true, y_pred):
@@ -52,6 +138,26 @@ def recall_m(y_true, y_pred):
     possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
     recall = true_positives / (possible_positives + K.epsilon())
     return recall
+
+""" Function precision_m(y_true, y_pred)
+
+    Creates a precision score based upon the formula: TP/TP + FP where TP= total positive, FP= false negative
+
+    parameters: (Array) lay_true,   - <beta>
+    
+                (Array) y_predyers - array with dropout rate after each layer
+                                  null for it does not apply droupout and float for applying.
+                                 Example: [null, null, null, 0.5, null, 0.25] will apply
+                                          0.5 dropout rate at 5th layer and 
+                                          0.25 dropout rate at 7th layer.
+                                          Invalid number layer is ignored.
+                                          OBS: it does not include input and output layers
+
+    return: 
+        precision:  is the ratio of correctly predicted positive observations
+    
+"""
+
 
 def precision_m(y_true, y_pred):
     true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
@@ -66,21 +172,20 @@ def f1_m(y_true, y_pred):
 
 
 
+
 # initialising variables
-path = pathlib.Path(__file__).resolve().parent # Getting the relative path of the file 
-path = str(path) + "/"
 epochs    = 3
 test_size = 0.2
 number_of_batch_files = 5
-myModelFile = path + "anomaliesDetectionModel.h5"
-myMetric = "accuracy"
-
 data      = [] # array with all images read from batch files
 X         = [] # array with images data including channels (RGB)
 y         = [] # array with labels (index of category of images)
 
 # Loading data 
 # images/ folder should be in the same location of the script
+# Getting the relative path of the file to avoid MacOS issues
+path = pathlib.Path(__file__).resolve().parent
+path = str(path) + "/"
 
 ## data: data_batch_N dictionary
     # { 
@@ -121,6 +226,15 @@ print("x_test initial shape:  ", x_test.shape)
 print("y_train initial shape:  ", len(y_train))
 print("y_test initial shape:  ", len(y_test))
 print("\n")
+
+# Pre-processing
+## Loading/Reading the required data for analysis & also preprocessing data.  
+### Zoom range is randomly zooming into images, horizontal flip randomly flips half images horizontally, shear range randomly shears some images - helps give detail to images that are blurry or fragmented in some way
+#x_trainNormalised = x_train(rescale = 1./255, shear_range = 0.1, zoom_range = 0.1,horizontal_flip = True)
+#x_testNormalised = x_test(rescale = 1./255, shear_range = 0.1, zoom_range = 0.1,horizontal_flip = True)
+
+#x_trainNormalised = ImageDataGenerator(rescale = 1./255, shear_range = 0.1, zoom_range = 0.1,horizontal_flip = True)
+#x_testNormalised = ImageDataGenerator(rescale = 1./255, shear_range = 0.1, zoom_range = 0.1,horizontal_flip = True)
 
 # Pre-processing
 x_trainNormalised = x_train / 255.0
@@ -165,32 +279,16 @@ a wide range of networks and tasks. For the input units, however,
 the optimal probability of retention is usually closer to 1 than to 0.5.
 (Dropout: A Simple Way to Prevent Neural Networks from Overfitting, 2014.)         
 """
+#                      CNN  CNN  CNN  CNN   FNN
+myModel = getMyModel( [None, None, None, None, None] )
 
-# designing the Convolutional Neural Network 
-model = tf.keras.models.Sequential()                                                                       #32    #32        #3           
-model.add(tf.keras.layers.Conv2D(filters=32, kernel_size=(3,3), input_shape = (nRowns, nColumns, nChannels), activation='relu')) #layer 1    
-#model.add(tf.keras.layers.Dropout(0.0))        
-# Size of Pooling of 2x2 is default for images
-model.add(tf.keras.layers.MaxPooling2D(pool_size = (2, 2)))
-model.add(tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), activation='relu')) # layer 2
-model.add(tf.keras.layers.MaxPool2D(pool_size = (3,3)))
+early_stop = getMyEarlyStop( myMonitor = "accuracy", myPatience = 2, myModelFile = path + "anomaliesDetectionModel.h5" )
 
-# designing by Fully Connect Neural Network
-model.add(tf.keras.layers.Flatten())
-model.add(tf.keras.layers.Dense(128, activation='relu'))    
-model.add(tf.keras.layers.Dense(10, activation='softmax'))
-    
-## compile DNN => not sparse_categorical_crossentropy because classes are exclusives!
-model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=[myMetric, f1_m, precision_m, recall_m])
-
-callbacks = [EarlyStopping(monitor=myMetric, patience=2, mode='auto'),
-             ModelCheckpoint(filepath=myModelFile, monitor=myMetric, save_best_only=True, verbose=1)]
- 
 ## validate
-model.fit(x_trainNormalised, y_trainCategorical, epochs=epochs, batch_size=32,  verbose=1, callbacks = callbacks)
+myModel.fit(x_trainNormalised, y_trainCategorical, epochs=epochs, batch_size=32,  verbose=1, callbacks = early_stop)
 
 ## evaluating the accuracy using test data
-loss_val, acc_val, f1_score, precision, recall = model.evaluate(x_testNormalised, y_testCategorical)
+loss_val, acc_val, f1_score, precision, recall = myModel.evaluate(x_testNormalised, y_testCategorical)
 print('Accuracy is: ', acc_val)
 print('F1 Score is: ', f1_score)
 print('Precision is: ', precision)
@@ -209,7 +307,7 @@ print('Recall is: ', recall)
 # Predicting aleatory sample from 0 to 2000 (test set has 2000 instances)
 someSample = random.randint(0, (len(X)*test_size) - 1 ) 
 
-y_predicted = np.argmax(model.predict(x_testNormalised), axis=-1)
+y_predicted = np.argmax(myModel.predict(x_testNormalised), axis=-1)
 #y_predicted = model.predict_classes(x_testNormalised) ==> DEPRECATED
 
 print("y_predicted for test dataset index ",someSample," is ", meta[b'label_names'][y_predicted[someSample]])
