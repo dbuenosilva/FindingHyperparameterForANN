@@ -24,6 +24,8 @@ from sklearn.model_selection import train_test_split #used to split data into tr
 from keras.callbacks import EarlyStopping, ModelCheckpoint 
 from tensorflow import keras #keras is the api that provides functionality to work with tensorflow
 from keras.preprocessing.image import ImageDataGenerator
+from keras import backend as K
+
 
 
 """ Function read( file_name  )
@@ -95,6 +97,8 @@ def getMyModel( MyDropout = [] ):
 
     # designing the Convolutional Neural Network 
     model = tf.keras.models.Sequential()
+    
+    # CNN
                                                                                    #32    #32        #3           
     model.add(tf.keras.layers.Conv2D(filters=32, kernel_size=(3,3), input_shape = (nRowns, nColumns, nChannels), activation='relu')) #layer 1    
     if len(MyDropout) > 0 and MyDropout[0]:
@@ -123,15 +127,54 @@ def getMyModel( MyDropout = [] ):
     model.add(tf.keras.layers.Dense(10, activation='softmax'))
     
     ## compile CNN => not sparse_categorical_crossentropy because classes are exclusives!
-    model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy"])
+    model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy", f1_m, precision_m, recall_m])
 
     return model
+
+""" Function to get formuals for precision, recall and f1 values"""
+
+def recall_m(y_true, y_pred):
+    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+    possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
+    recall = true_positives / (possible_positives + K.epsilon())
+    return recall
+
+""" Function precision_m(y_true, y_pred)
+
+    Creates a precision score based upon the formula: TP/TP + FP where TP= total positive, FP= false negative
+
+    parameters: (Array) lay_true,   - <beta>
+    
+                (Array) y_predyers - array with dropout rate after each layer
+                                  null for it does not apply droupout and float for applying.
+                                 Example: [null, null, null, 0.5, null, 0.25] will apply
+                                          0.5 dropout rate at 5th layer and 
+                                          0.25 dropout rate at 7th layer.
+                                          Invalid number layer is ignored.
+                                          OBS: it does not include input and output layers
+
+    return: 
+        precision:  is the ratio of correctly predicted positive observations
+    
+"""
+
+
+def precision_m(y_true, y_pred):
+    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+    predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
+    precision = true_positives / (predicted_positives + K.epsilon())
+    return precision
+
+def f1_m(y_true, y_pred):
+    precision = precision_m(y_true, y_pred)
+    recall = recall_m(y_true, y_pred)
+    return 2*((precision*recall)/(precision+recall+K.epsilon()))
 
 
 
 
 # initialising variables
-epochs    = 30
+epochs    = 3
 test_size = 0.2
 number_of_batch_files = 5
 data      = [] # array with all images read from batch files
@@ -234,7 +277,7 @@ independent of other units, where p can be chosen using a validation
 set or can simply be set at 0.5, which seems to be close to optimal for 
 a wide range of networks and tasks. For the input units, however, 
 the optimal probability of retention is usually closer to 1 than to 0.5.
-(Dropout: A Simple Way to Prevent Neural Networks from Overfitting, 2014.)
+(Dropout: A Simple Way to Prevent Neural Networks from Overfitting, 2014.)         
 """
 #                      CNN  CNN  CNN  CNN   FNN
 myModel = getMyModel( [None, None, None, None, None] )
@@ -245,8 +288,11 @@ early_stop = getMyEarlyStop( myMonitor = "accuracy", myPatience = 2, myModelFile
 myModel.fit(x_trainNormalised, y_trainCategorical, epochs=epochs, batch_size=32,  verbose=1, callbacks = early_stop)
 
 ## evaluating the accuracy using test data
-loss_val, acc_val = myModel.evaluate(x_testNormalised, y_testCategorical)
+loss_val, acc_val, f1_score, precision, recall = myModel.evaluate(x_testNormalised, y_testCategorical)
 print('Accuracy is: ', acc_val)
+print('F1 Score is: ', f1_score)
+print('Precision is: ', precision)
+print('Recall is: ', recall)
 
 ## evaluating the accuracy another way to ensure its accurate - with a for loop
 #Rec_Acc = 0
