@@ -76,19 +76,19 @@ for n in range(1,number_of_batch_files + 1,1):
     # } 
 meta = read( path + 'images/batches.meta')
 
-# Unifying all images pixels values in unique array X
+# Unifying all images pixels values in unique array X with 50,000 images
 for images in data:
     if len(X) == 0:
-        X = images[b'data']
+        X = images[b'data'] # data[n]  => data = { data_batch_1, data_batch_2, data_batch_3, data_batch_4, data_batch5   }
     else:
-        X = np.concatenate((X, images[b'data']), axis=0) 
-    y = np.append(y, images[b'labels'] )
+        X = np.concatenate((X, images[b'data']), axis=0)  # data [ [a,b,c,d ] ]   
+    y = np.append(y, images[b'labels'] ) # y [ 0,1,2,3 ... 50,000] with 50,000 labels
     
     
 print("\nX.shape with all images data: ", X.shape)
 print("\ny.shape with all images labels", y.shape)
 
-# Selecting 40000 instances for training set and 10000 for test set
+# Selecting 40000 instances for training set and 10000 for test set 
 [x_train, x_test, y_train, y_test] = train_test_split(X, y, test_size = test_size, random_state= 42 )
     
 ## Shape of original data
