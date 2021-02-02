@@ -25,6 +25,8 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow import keras #keras is the api that provides functionality to work with tensorflow
 from keras.preprocessing.image import ImageDataGenerator
 from keras import backend as K
+#from sklearn.metrics import log_loss   - not needed as it is more applicable to binary classification problems
+
 
 
 
@@ -45,7 +47,7 @@ def read(file_name):
     return dict
 
 
-""" Function to get formuals for precision, recall and f1 values"""
+""" Function to get formulas for precision, recall and f1 values"""
 
 def recall_m(y_true, y_pred):
     true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
@@ -59,12 +61,43 @@ def precision_m(y_true, y_pred):
     precision = true_positives / (predicted_positives + K.epsilon())
     return precision
 
-def f1_m(y_true, y_pred):
+def f1_m(y_true, y_pred): ## has a beta of 1 as it equally weights recall and precision
     precision = precision_m(y_true, y_pred)
     recall = recall_m(y_true, y_pred)
     return 2*((precision*recall)/(precision+recall+K.epsilon()))
 
+def fbetaprecisionskewed(y_true, y_pred, threshold_shift=0.5):
+    beta = 0.2 #Beta value below 1 favours precision. 
 
+    y_pred = K.clip(y_pred, 0, 1)
+
+    # shifting the prediction threshold from .5 
+    #y_pred = K.round(y_pred + threshold_shift)
+
+    precision = precision_m(y_true, y_pred)
+    recall = recall_m(y_true, y_pred)
+
+    beta_squared = beta ** 2
+    return (beta_squared + 1) * (precision * recall) / (beta_squared * precision + recall) 
+
+def fbetarecallskewed(y_true, y_pred, threshold_shift=0.5):
+    beta = 2 #Beta value greater than 1 favours recall. 
+
+    y_pred = K.clip(y_pred, 0, 1)
+
+    # shifting the prediction threshold from .5 
+    #y_pred = K.round(y_pred + threshold_shift)
+
+    precision = precision_m(y_true, y_pred)
+    recall = recall_m(y_true, y_pred)
+
+    beta_squared = beta ** 2
+    return (beta_squared + 1) * (precision * recall) / (beta_squared * precision + recall) 
+
+    ##Not using log loss as it is only used for binary classification problems 
+    #def log loss 
+    #log_loss= log_loss(y_test,y_train)
+    #return log_loss
 
 # initialising variables
 path = pathlib.Path(__file__).resolve().parent # Getting the relative path of the file 
@@ -181,7 +214,7 @@ model.add(tf.keras.layers.Dense(128, activation='relu'))
 model.add(tf.keras.layers.Dense(10, activation='softmax'))
     
 ## compile DNN => not sparse_categorical_crossentropy because classes are exclusives!
-model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=[myMetric, f1_m, precision_m, recall_m])
+model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=[myMetric, f1_m, precision_m, recall_m, fbetaprecisionskewed, fbetarecallskewed])
 
 callbacks = [EarlyStopping(monitor=myMetric, patience=2, mode='auto'),
              ModelCheckpoint(filepath=myModelFile, monitor=myMetric, save_best_only=True, verbose=1)]
@@ -190,11 +223,15 @@ callbacks = [EarlyStopping(monitor=myMetric, patience=2, mode='auto'),
 model.fit(x_trainNormalised, y_trainCategorical, epochs=epochs, batch_size=32,  verbose=1, callbacks = callbacks)
 
 ## evaluating the accuracy using test data
-loss_val, acc_val, f1_score, precision, recall = model.evaluate(x_testNormalised, y_testCategorical)
+loss_val, acc_val, f1_score, precision, recall, fbetaprecisionskewed, fbetarecallskewed = model.evaluate(x_testNormalised, y_testCategorical)
 print('Accuracy is: ', acc_val)
 print('F1 Score is: ', f1_score)
 print('Precision is: ', precision)
 print('Recall is: ', recall)
+print('F- Beta (0.2) Score is: ', fbetaprecisionskewed)
+print('F- Beta (2) Score is: ', fbetarecallskewed)
+
+
 
 ## evaluating the accuracy another way to ensure its accurate - with a for loop
 #Rec_Acc = 0
