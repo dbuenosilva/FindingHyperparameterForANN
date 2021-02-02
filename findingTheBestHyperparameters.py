@@ -25,7 +25,7 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 from tensorflow import keras #keras is the api that provides functionality to work with tensorflow
 from keras.preprocessing.image import ImageDataGenerator
 from keras import backend as K
-
+from sklearn.metrics import mean_squared_error
 
 
 """ Function read( file_name  )
@@ -172,10 +172,35 @@ def f1_m(y_true, y_pred):
 
 
 
+ '''   Dodgy loop that doesn't find the ideal no of neurons
+     idealnoofneurons = []
+    for i in range(1,50,1):
+        random.seed(10)
+        [x_train, x_test, y_train, y_test] = train_test_split(X, y, test_size = test_size, random_state= 42 )
 
+        
+        
 
+        # designing the Convolutional Neural Network 
+        model = tf.keras.models.Sequential()                                                                       #32    #32        #3           
+        model.add(tf.keras.layers.Conv2D(filters=32, kernel_size=(3,3), input_shape = (nRowns, nColumns, nChannels), activation='relu')) #layer 1    
+        #model.add(tf.keras.layers.Dropout(0.0))        
+        # Size of Pooling of 2x2 is default for images
+        model.add(tf.keras.layers.MaxPooling2D(pool_size = (2, 2)))
+        model.add(tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), activation='relu')) # layer 2
+        model.add(tf.keras.layers.MaxPool2D(pool_size = (3,3)))
+        
+        # designing by Fully Connect Neural Network
+        model.add(tf.keras.layers.Flatten())
+        model.add(tf.keras.layers.Dense(i, activation='relu'))    
+        model.add(tf.keras.layers.Dense(10, activation='softmax'))
 
-
+        pred = model.predict(x_test)
+        score = np.sqrt(tf.sklearn.metrics.mean_squared_error(pred,y_test))
+        print ("Score (RMSE): {}".format(score))
+        idealnoofneurons.append(score)
+        print i?? 
+'''
 
 # initialising variables
 epochs    = 3
@@ -269,7 +294,7 @@ print("y_trainCategorical shape: ", y_trainCategorical.shape)
 print("y_testCategorical shape: ", y_testCategorical.shape)
 
 
-## PENDIND: test if different model can be load and train with another number of layers, etc
+## PENDING: test if different model can be load and train with another number of layers, etc
 #MyModel = keras.models.load_model(myModel)
 
 """  DROPOUT HINTS:

@@ -204,7 +204,7 @@ model = tf.keras.models.Sequential()                                            
 model.add(tf.keras.layers.Conv2D(filters=32, kernel_size=(3,3), input_shape = (nRowns, nColumns, nChannels), activation='relu')) #layer 1    
 #model.add(tf.keras.layers.Dropout(0.0))        
 # Size of Pooling of 2x2 is default for images
-model.add(tf.keras.layers.MaxPooling2D(pool_size = (2, 2)))
+model.add(tf.keras.layers.MaxPooling2D(pool_size = (2, 2))) #, strides=2)) testing if strides improve accuracy
 model.add(tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), activation='relu')) # layer 2
 model.add(tf.keras.layers.MaxPool2D(pool_size = (3,3)))
 
@@ -231,7 +231,12 @@ print('Recall is: ', recall)
 print('F- Beta (0.2) Score is: ', fbetaprecisionskewed)
 print('F- Beta (2) Score is: ', fbetarecallskewed)
 
-
+#can't get this functional either I'm getting mad
+# plt.plot(epochs, acc_val)
+# plt.show()
+# plt.plot(epochs, f1_score)
+# plt.plot(epochs, precision)
+# plt.plot(epochs, recall)
 
 ## evaluating the accuracy another way to ensure its accurate - with a for loop
 #Rec_Acc = 0
@@ -259,3 +264,5 @@ img = np.dstack((im_r, im_g, im_b))
 
 plt.imshow(img) 
 plt.show()
+
+
