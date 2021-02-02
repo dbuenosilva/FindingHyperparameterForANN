@@ -102,7 +102,7 @@ def fbetarecallskewed(y_true, y_pred, threshold_shift=0.5):
 # initialising variables
 path = pathlib.Path(__file__).resolve().parent # Getting the relative path of the file 
 path = str(path) + "/"
-epochs    = 3
+epochs    = 30
 test_size = 0.2
 number_of_batch_files = 5
 myModelFile = path + "anomaliesDetectionModel.h5"
@@ -216,7 +216,7 @@ model.add(tf.keras.layers.Dense(10, activation='softmax'))
 ## compile DNN => not sparse_categorical_crossentropy because classes are exclusives!
 model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=[myMetric, f1_m, precision_m, recall_m, fbetaprecisionskewed, fbetarecallskewed])
 
-callbacks = [EarlyStopping(monitor=myMetric, patience=2, mode='auto'),
+callbacks = [EarlyStopping(monitor=myMetric, min_delta=0.05 , patience=2, mode='auto'),
              ModelCheckpoint(filepath=myModelFile, monitor=myMetric, save_best_only=True, verbose=1)]
  
 ## validate
