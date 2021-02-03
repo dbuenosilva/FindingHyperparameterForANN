@@ -17,6 +17,8 @@ import tensorflow as tf # using Tensorflow 2.4
 from tensorflow.keras.utils import to_categorical
 from sklearn.model_selection import train_test_split #used to split data into training and test segments
 from keras.callbacks import EarlyStopping, ModelCheckpoint 
+#from keras import backend as K
+#K.set_image_dim_ordering('tf') # Setting tensorflow-style ordering (NHWC).
 
 ## Importing especific functions used in this program 
 path = str(pathlib.Path(__file__).resolve().parent) + "/"
@@ -118,36 +120,52 @@ print("x_test normalised shape: ", x_testNormalised.shape)
 print("y_trainCategorical shape: ", y_trainCategorical.shape)
 print("y_testCategorical shape: ", y_testCategorical.shape)
 print("\n\n")
-# Loading previously trained model  
-## PENDIND: test if different model can be load and train with another number of layers, etc
 
-# if files exist, load:
-#    model = tf.keras.models.load_model(myModelFile)
 
-"""  DROPOUT HINTS:
-In practice, you can usually apply dropout only to the neurons in the top one to three layers (excluding the output layer).
-(Aurelien pag. 481)
-
-In the simplest case, each unit is retained with a fixed probability p 
-independent of other units, where p can be chosen using a validation 
-set or can simply be set at 0.5, which seems to be close to optimal for 
-a wide range of networks and tasks. For the input units, however, 
-the optimal probability of retention is usually closer to 1 than to 0.5.
-(Dropout: A Simple Way to Prevent Neural Networks from Overfitting, 2014.)         
-"""
+## Loading previously trained model
+# If the model has been trained before, load it
+try:
+    model = tf.keras.models.load_model(myModelFile,
+            custom_objects={'f1_m': f1_m,
+                            'precision_m': precision_m, 
+                            'recall_m': recall_m, 
+                            'fbetaprecisionskewed': fbetaprecisionskewed, 
+                            'fbetarecallskewed': fbetarecallskewed})
+    print("Model file " + myModelFile + " sucessfully loaded!\n")
+    
+except OSError:
+    print("Previously saved model does not exist.\n" +
+          "Creating first file " + myModelFile + "\n")
+except:
+    print("Error trying to open the file " + myModelFile +
+          "\nCurrent file will be replaced!\n")
+ 
+    
+## Deploying the best configuration for Deep Neural Networking
+#  found by findingTheBestHyperparameters.py
 
 # designing the Convolutional Neural Network 
-model = tf.keras.models.Sequential()                                                                       #32    #32        #3           
-model.add(tf.keras.layers.Conv2D(filters=32, kernel_size=(3,3), input_shape = (nRowns, nColumns, nChannels), activation='relu')) #layer 1    
-#model.add(tf.keras.layers.Dropout(0.0))        
-# Size of Pooling of 2x2 is default for images
+model = tf.keras.models.Sequential()                                               #32    #32        #3           
+model.add(tf.keras.layers.Conv2D(filters=32, kernel_size=(3,3), input_shape = (nRowns, nColumns, nChannels), activation='relu'))           
 model.add(tf.keras.layers.MaxPooling2D(pool_size = (2, 2))) #, strides=2)) testing if strides improve accuracy
-model.add(tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), activation='relu')) # layer 2
-model.add(tf.keras.layers.MaxPool2D(pool_size = (3,3)))
+#model.add(tf.keras.layers.Dropout(0.8)) 
+
+model.add(tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), activation='relu', padding='same')) 
+model.add(tf.keras.layers.MaxPool2D(pool_size = (2,2)))
+#model.add(tf.keras.layers.Dropout(0.5)) 
+
+model.add(tf.keras.layers.Conv2D(filters=96, kernel_size=(3,3), activation='relu', padding='same'))
+model.add(tf.keras.layers.MaxPool2D(pool_size = (2,2)))
+#model.add(tf.keras.layers.Dropout(0.4))
+
+model.add(tf.keras.layers.Conv2D(filters=128, kernel_size=(3,3), activation='relu', padding='same'))
+model.add(tf.keras.layers.MaxPool2D(pool_size = (2,2)))
+#model.add(tf.keras.layers.Dropout(0.4))
+
 
 # designing by Fully Connect Neural Network
 model.add(tf.keras.layers.Flatten())
-model.add(tf.keras.layers.Dense(128, activation='relu'))    
+model.add(tf.keras.layers.Dense(160, activation='relu'))    
 model.add(tf.keras.layers.Dense(10, activation='softmax'))
     
 ## compile DNN => not sparse_categorical_crossentropy because classes are exclusives!
@@ -162,12 +180,12 @@ model.fit(x_trainNormalised, y_trainCategorical, epochs=noOfEpochs, batch_size=m
 
 ## evaluating the accuracy using test data
 loss_val, acc_val, f1_score, precision, recall, fbetaprecisionskewed, fbetarecallskewed = model.evaluate(x_testNormalised, y_testCategorical)
-print('Accuracy is: ', acc_val)
-print('F1 Score is: ', f1_score)
-print('Precision is: ', precision)
-print('Recall is: ', recall)
-print('F- Beta (0.2) Score is: ', fbetaprecisionskewed)
-print('F- Beta (2) Score is: ', fbetarecallskewed)
+print('\n\nAccuracy: ', acc_val)
+print('F1 Score: ', f1_score)
+print('Precision: ', precision)
+print('Recall: ', recall)
+print('F- Beta (0.2) Score: ', fbetaprecisionskewed)
+print('F- Beta (2) Score: ', fbetarecallskewed)
 
 # Predicting aleatory sample from 0 to 10,000 (test set has 10,000 instances)
 someSample = random.randint(0, (len(X)*myTestSize) - 1 ) 
