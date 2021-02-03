@@ -33,7 +33,7 @@ myModelFile = path + "anomaliesDetectionModel.h5" # file to save trained model
 myResults   = path + "results.csv"
 
 # Setting Hyperparameters
-noOfEpochs  = 2   # define number of epochs to execute
+noOfEpochs  = 1   # define number of epochs to execute
 myBatchSze  = 32  # size of each batch in interaction to get an epoch
 myTestSize  = 0.2 # how much have to be split for testing
 noOfFiles   = 5   # number of batch files to process
@@ -235,7 +235,7 @@ print('F- Beta (2) Score: ', fbetarecallskewed)
 # RECALL ; F- BETA 0.2 ; F- BETA 2
 #
 
-contend = ";" + str(len(X)*myTestSize)
+contend = str(len(X)*myTestSize)
 contend += ";" + str(myTestSize)
 contend += ";" + str(MyRandomSt)
 contend += ";" + str(noOfEpochs)
@@ -263,6 +263,7 @@ contend += ";" + str(precision)
 contend += ";" + str(recall) 
 contend += ";" + str(fbetaprecisionskewed) 
 contend += ";" + str(fbetarecallskewed) 
+contend += "\n" + str(fbetarecallskewed) 
 
 
 saveToFile(myResults, contend)
