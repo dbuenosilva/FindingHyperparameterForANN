@@ -34,10 +34,12 @@ noOfEpochs  = 1   # define number of epochs to execute
 myBatchSze  = 32  # size of each batch in interaction to get an epoch
 myTestSize  = 0.2 # how much have to be split for testing
 noOfFiles   = 5   # number of batch files to process
-myMinDelta  = 0.05
-myPatience  = 2
-MyRandomSt  = 42
+myMinDelta  = 0.05# minimum improvement rate for do not early stop
+myPatience  = 2   # how many epochs run with improvement lower than myMinDelta 
+MyRandomSt  = 42  # random state for shuffling the data
 myMetric    = "accuracy" # type of metric used for training
+MyOptimizer = "adam"
+MyLoss      = "categorical_crossentropy"
 
 # Loading the data. "images/" folder must be in the same location of the script
 #
@@ -149,7 +151,7 @@ model.add(tf.keras.layers.Dense(128, activation='relu'))
 model.add(tf.keras.layers.Dense(10, activation='softmax'))
     
 ## compile DNN => not sparse_categorical_crossentropy because classes are exclusives!
-model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=[myMetric, f1_m, precision_m, recall_m, fbetaprecisionskewed, fbetarecallskewed])
+model.compile(optimizer=MyOptimizer, loss=MyLoss, metrics=[myMetric, f1_m, precision_m, recall_m, fbetaprecisionskewed, fbetarecallskewed])
 
 # Stopping early according to myMinDelta to avoid overfitting. Trained model saved at myModelFile
 myCallbacks = [EarlyStopping(monitor=myMetric, min_delta=myMinDelta , patience=myPatience, mode='auto'),
