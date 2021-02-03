@@ -6,125 +6,43 @@ Date: 24/01/2021
 Author: Diego Bueno (ID: 23567850) / Isabelle Sypott (ID: 21963427 )
 e-mail: d.bueno.da.silva.10@student.scu.edu.au / i.sypott.10@student.scu.edu.au
 
-
-
-Last version
-
 """
 
 ## importing the libraries required
 import numpy as np
+import sys
 import pathlib
-import pickle
 import random
-import matplotlib.pyplot as plt
 import tensorflow as tf # using Tensorflow 2.4
 from tensorflow.keras.utils import to_categorical
 from sklearn.model_selection import train_test_split #used to split data into training and test segments
 from keras.callbacks import EarlyStopping, ModelCheckpoint 
-from tensorflow import keras #keras is the api that provides functionality to work with tensorflow
-from keras.preprocessing.image import ImageDataGenerator
-from keras import backend as K
-#from sklearn.metrics import log_loss   - not needed as it is more applicable to binary classification problems
 
-
-
-
-""" Function read( file_name  )
-
-    Read a pickle file format  
-    and return a Python dictionary with its content.
-
-    parameters: (String) file_name
-
-    return: 
-        dict: a dictionary with the content encoding in bytes
-    
-"""
-def read(file_name):
-    with open(file_name, 'rb') as fo:
-        dict = pickle.load(fo, encoding='bytes')
-    return dict
-
-
-""" Function to get formulas for precision, recall and f1 values"""
-
-def recall_m(y_true, y_pred):
-    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-    possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
-    recall = true_positives / (possible_positives + K.epsilon())
-    return recall
-
-def precision_m(y_true, y_pred):
-    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
-    predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
-    precision = true_positives / (predicted_positives + K.epsilon())
-    return precision
-
-def f1_m(y_true, y_pred): ## has a beta of 1 as it equally weights recall and precision
-    precision = precision_m(y_true, y_pred)
-    recall = recall_m(y_true, y_pred)
-    return 2*((precision*recall)/(precision+recall+K.epsilon()))
-
-def fbetaprecisionskewed(y_true, y_pred, threshold_shift=0.5):
-    beta = 0.2 #Beta value below 1 favours precision. 
-
-    y_pred = K.clip(y_pred, 0, 1)
-
-    # shifting the prediction threshold from .5 
-    #y_pred = K.round(y_pred + threshold_shift)
-
-    precision = precision_m(y_true, y_pred)
-    recall = recall_m(y_true, y_pred)
-
-    beta_squared = beta ** 2
-    return (beta_squared + 1) * (precision * recall) / (beta_squared * precision + recall) 
-
-def fbetarecallskewed(y_true, y_pred, threshold_shift=0.5):
-    beta = 2 #Beta value greater than 1 favours recall. 
-
-    y_pred = K.clip(y_pred, 0, 1)
-
-    # shifting the prediction threshold from .5 
-    #y_pred = K.round(y_pred + threshold_shift)
-
-    precision = precision_m(y_true, y_pred)
-    recall = recall_m(y_true, y_pred)
-
-    beta_squared = beta ** 2
-    return (beta_squared + 1) * (precision * recall) / (beta_squared * precision + recall) 
-
-    ##Not using log loss as it is only used for binary classification problems 
-    #def log loss 
-    #log_loss= log_loss(y_test,y_train)
-    #return log_loss
+## Importing especific functions used in this program 
+path = str(pathlib.Path(__file__).resolve().parent) + "/"
+sys.path.append(path)
+from functions import *
 
 # initialising variables
-path = pathlib.Path(__file__).resolve().parent # Getting the relative path of the file 
-path = str(path) + "/"
-epochs    = 30
-test_size = 0.2
-number_of_batch_files = 5
-myModelFile = path + "anomaliesDetectionModel.h5"
-myMetric = "accuracy"
+data        = [] # array with all list of images read from batch files
+X           = [] # array with images data including channels (RGB)
+y           = [] # array with labels (index of category of images)
+myModelFile = path + "anomaliesDetectionModel.h5" # file to save trained model
 
-data      = [] # array with all images read from batch files
-X         = [] # array with images data including channels (RGB)
-y         = [] # array with labels (index of category of images)
+# Setting Hyperparameters
+noOfEpochs  = 1   # define number of epochs to execute
+myBatchSze  = 32  # size of each batch in interaction to get an epoch
+myTestSize  = 0.2 # how much have to be split for testing
+noOfFiles   = 5   # number of batch files to process
+myMinDelta  = 0.05
+myPatience  = 2
+MyRandomSt  = 42
+myMetric    = "accuracy" # type of metric used for training
 
-# Loading data 
-# images/ folder should be in the same location of the script
-
-## data: data_batch_N dictionary
-    # { 
-    # b'labels': b'training batch 5 of 5' => title of dictionary
-    # b'labels': [1, 8... n ] => array 1D of size 10,000 labels
-    # b'data': array([[255, 252, 253,..] , [127, 126, 127, ...], [...]] ) => array of size 10,000 x 3,072 ( 1024 R + 1024 G + 1024 B )
-    # b'filenames': [b'compact_car_s_001706.png', b'icebreaker_s_001689.png',...] => array of size 10,000 with files names
-    # }    
-for n in range(1,number_of_batch_files + 1,1):
-    data = np.append(data, read( path + 'images/data_batch_' + str(n)) )
-
+# Loading the data. "images/" folder must be in the same location of the script
+#
+# Structure of meta dictionary
+#
 ## meta dictionary:
     # {   
     # num_cases_per_batch': 10000
@@ -134,58 +52,75 @@ for n in range(1,number_of_batch_files + 1,1):
     # } 
 meta = read( path + 'images/batches.meta')
 
-# Unifying all images pixels values in unique array X with 50,000 images
-for images in data:
-    if len(X) == 0:
-        X = images[b'data'] # data[n]  => data = { data_batch_1, data_batch_2, data_batch_3, data_batch_4, data_batch5   }
-    else:
-        X = np.concatenate((X, images[b'data']), axis=0)   # data [ [a,b,c,d ] ] 
-    y = np.append(y, images[b'labels'] ) # y [ 0,1,2,3 ... 50,000] with 50,000 labels
-        
-print("\nX.shape with all images data: ", X.shape)
-print("\ny.shape with all images labels", y.shape)
+#
+# Structure of data dictionary
+#
+## data: data_batch_N dictionary
+    # { 
+    # b'labels': b'training batch 5 of 5' => title of dictionary
+    # b'labels': [1, 8... n ] => array 1D of size 10,000 labels
+    # b'data': array([[255, 252, 253,..] , [127, 126, 127, ...], [...]] ) => array of size 10,000 x 3,072 ( 1024 R + 1024 G + 1024 B )
+    # b'filenames': [b'compact_car_s_001706.png', b'icebreaker_s_001689.png',...] => array of size 10,000 with files names
+    # }        
+for n in range(1,noOfFiles + 1,1):
+    data = np.append(data, read( path + 'images/data_batch_' + str(n)) )
 
-# Selecting 40000 instances for training set and 10000 for test set
-[x_train, x_test, y_train, y_test] = train_test_split(X, y, test_size = test_size, random_state= 42 )
-    
-## Shape of original data
-print("\n\nx_train initial shape:  ", x_train.shape)
+# Unifying all images pixels values in unique array X with 50,000 images
+for images in data: # data = { data_batch_1, data_batch_2, data_batch_3, data_batch_4, data_batch5   }
+    if len(X) == 0:
+        X = images[b'data'] 
+    else: # Need to concatenate instead append to create a unique array with 50,000 images
+        X = np.concatenate((X, images[b'data']), axis=0)
+    y = np.append(y, images[b'labels'] ) # y [ 0,1,2,3 ... 50,000] with 50,000 labels
+
+print("Shape of inputted data")        
+print("\nX shape with all images data: ", X.shape)
+print("y shape with all images labels", y.shape)
+
+# Selecting 40,000 instances for training set and 10,000 for test set
+[x_train, x_test, y_train, y_test] = train_test_split(X, y, test_size = myTestSize, random_state= MyRandomSt )
+
+print("\nShape of split data")
+print("\nx_train initial shape:  ", x_train.shape)
 print("x_test initial shape:  ", x_test.shape)
 print("y_train initial shape:  ", len(y_train))
 print("y_test initial shape:  ", len(y_test))
 print("\n")
-
-# Pre-processing
+ 
+# Pre-processing to work with values between 0.0 and 1
 x_trainNormalised = x_train / 255.0
 x_testNormalised = x_test / 255.0
 
-## Changing the shape of INPUT data
+## Changing the shape of inputted data
 nInstancesTrain  = x_trainNormalised.shape[0]
 nInstancesTest   = x_testNormalised.shape[0]
 nRowns           = 32 
 nColumns         = 32
 nChannels        = 3  # 3 channels denotes one red, green and blue (RGB image)
 
-#x_train = x_trainNormalised.reshape(8000, 32, 32, 3)
+#x_trainNormalised= x_trainNormalised.reshape(   40,000,          32,     32,       3     )
 x_trainNormalised = x_trainNormalised.reshape(nInstancesTrain, nRowns, nColumns, nChannels) 
 
-#x_test = x_test.x_testNormalised(2000, 32, 32, 3)
+#x_testNormalised = x_testNormalised.reshape(  10,000,        32,      32,       3     )
 x_testNormalised = x_testNormalised.reshape(nInstancesTest, nRowns, nColumns, nChannels)
 
-## Changing the shape of OUTPUT layer, also changing the labels of train and test into categorical data
+# Changing the shape of OUTPUT layer, also changing the labels of train and test into categorical data
 # It creates hot vectors for the classes like: [0. 0. 0. 1. 0. 0. 0. 0. 0. 0.]
 y_trainCategorical = to_categorical(y_train)
 y_testCategorical = to_categorical(y_test)
 
 # Checking that train and test data categorical and normalised are the correct shape for NN
-print("x_train normalised shape: ", x_trainNormalised.shape)
+print("\nShape of normalised data")
+print("\nx_train normalised shape: ", x_trainNormalised.shape)
 print("x_test normalised shape: ", x_testNormalised.shape)
 print("y_trainCategorical shape: ", y_trainCategorical.shape)
 print("y_testCategorical shape: ", y_testCategorical.shape)
-
-
+print("\n\n")
+# Loading previously trained model  
 ## PENDIND: test if different model can be load and train with another number of layers, etc
-#MyModel = keras.models.load_model(myModel)
+
+# if files exist, load:
+#    model = tf.keras.models.load_model(myModelFile)
 
 """  DROPOUT HINTS:
 In practice, you can usually apply dropout only to the neurons in the top one to three layers (excluding the output layer).
@@ -216,11 +151,12 @@ model.add(tf.keras.layers.Dense(10, activation='softmax'))
 ## compile DNN => not sparse_categorical_crossentropy because classes are exclusives!
 model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=[myMetric, f1_m, precision_m, recall_m, fbetaprecisionskewed, fbetarecallskewed])
 
-callbacks = [EarlyStopping(monitor=myMetric, min_delta=0.05 , patience=2, mode='auto'),
+# Stopping early according to myMinDelta to avoid overfitting. Trained model saved at myModelFile
+myCallbacks = [EarlyStopping(monitor=myMetric, min_delta=myMinDelta , patience=myPatience, mode='auto'),
              ModelCheckpoint(filepath=myModelFile, monitor=myMetric, save_best_only=True, verbose=1)]
  
-## validate
-model.fit(x_trainNormalised, y_trainCategorical, epochs=epochs, batch_size=32,  verbose=1, callbacks = callbacks)
+## Training the model according to the labels and chose hyperparameters
+model.fit(x_trainNormalised, y_trainCategorical, epochs=noOfEpochs, batch_size=myBatchSze,  verbose=1, callbacks = myCallbacks)
 
 ## evaluating the accuracy using test data
 loss_val, acc_val, f1_score, precision, recall, fbetaprecisionskewed, fbetarecallskewed = model.evaluate(x_testNormalised, y_testCategorical)
@@ -231,38 +167,22 @@ print('Recall is: ', recall)
 print('F- Beta (0.2) Score is: ', fbetaprecisionskewed)
 print('F- Beta (2) Score is: ', fbetarecallskewed)
 
-#can't get this functional either I'm getting mad
-# plt.plot(epochs, acc_val)
-# plt.show()
-# plt.plot(epochs, f1_score)
-# plt.plot(epochs, precision)
-# plt.plot(epochs, recall)
-
-## evaluating the accuracy another way to ensure its accurate - with a for loop
-#Rec_Acc = 0
-#for i in range(len(y_test)):
-#  if (y_predicted[i] == y_test[i]):
-    #Rec_Acc = Rec_Acc +1
-  # else:
-  #   print(y_predicted[i][0])   
-#Rec_Acc = Rec_Acc/len(y_test)*100
-#print("Recognition Accuracy: ",Rec_Acc,"%")
-
-# Predicting aleatory sample from 0 to 2000 (test set has 2000 instances)
-someSample = random.randint(0, (len(X)*test_size) - 1 ) 
-
+# Predicting aleatory sample from 0 to 10,000 (test set has 10,000 instances)
+someSample = random.randint(0, (len(X)*myTestSize) - 1 ) 
 y_predicted = np.argmax(model.predict(x_testNormalised), axis=-1)
-#y_predicted = model.predict_classes(x_testNormalised) ==> DEPRECATED
 
 print("y_predicted for test dataset index ",someSample," is ", meta[b'label_names'][y_predicted[someSample]])
 
-im_r = x_test[someSample][0:1024].reshape(32, 32)
-im_g = x_test[someSample][1024:2048].reshape(32, 32)
-im_b = x_test[someSample][2048:3072].reshape(32, 32)
-
-img = np.dstack((im_r, im_g, im_b))
-
-plt.imshow(img) 
-plt.show()
-
+# Print the image
+printImage(x_test[someSample])
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
