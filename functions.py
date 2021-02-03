@@ -65,14 +65,26 @@ def getMyEarlyStop( myMonitor = "", myPatience = 0, myModelFile = "" ):
 
 
 
-""" Function getMyModel(layers<beta>, dropout)
+""" Function getMyModel( *args )
 
     Create a customised model according with parameters
     and return a model object.
 
-    parameters: (Array) layers  - <beta>
-    
-                (Array) dropout - array with dropout rate after each layer
+    parameters:(list) inputShape, 
+               (string) myMetric,
+               (string) MyOptimizer,
+               (string) MyLoss,
+               (float) MyLearnRate,
+               (int) noOfLayersCNN, 
+               (int) noFiltersCNN,
+               (string) hiddenActCNN,
+               (string) outputActCNN,
+               (array) dropOutsCNN,
+               (int) noLayersFNN,
+               (int) noNeuronsFNN,
+               (string) hiddenActFNN,
+               (string) outputActFNN,
+               (array) dropOutsFNN - array with dropout rate after each layer
                                   null for it does not apply droupout and float for applying.
                                  Example: [null, null, null, 0.5, null, 0.25] will apply
                                           0.5 dropout rate at 5th layer and 
@@ -85,43 +97,71 @@ def getMyEarlyStop( myMonitor = "", myPatience = 0, myModelFile = "" ):
     
 """
 
-def getMyModel(nLayers, nRowns, nColumns, nChannels, MyDropout = [] ):
+def getMyModel(inputShape, 
+               myMetric,
+               MyOptimizer,
+               MyLoss,
+               MyLearnRate,
+               noOfLayersCNN, 
+               noFiltersCNN,
+               hiddenActCNN,
+               outputActCNN,
+               dropOutsCNN,
+               noLayersFNN,
+               noNeuronsFNN,
+               hiddenActFNN,
+               outputActFNN,
+               dropOutsFNN):
 
-    # designing the Convolutional Neural Network 
+
     model = tf.keras.models.Sequential()
-    
-    # CNN
-                                                                                   #32    #32        #3           
-    model.add(tf.keras.layers.Conv2D(filters=32, kernel_size=(3,3), input_shape = (nRowns, nColumns, nChannels), activation='relu'))     
-    if len(MyDropout) > 0 and MyDropout[0]:
-        model.add(tf.keras.layers.Dropout(MyDropout[0]))    
-    
-    # Size of Pooling of 2x2 is default for images
-    model.add(tf.keras.layers.MaxPooling2D(pool_size = (2, 2)))
-    if len(MyDropout) > 1 and MyDropout[1]:
-        model.add(tf.keras.layers.Dropout(MyDropout[1]))
 
-    model.add(tf.keras.layers.Conv2D(filters=64, kernel_size=(3,3), activation='relu')) # layer 2
-    if len(MyDropout) > 2 and MyDropout[2]:
-        model.add(tf.keras.layers.Dropout(MyDropout[2]))
+    """ Designing the Convolutional Neural Network in case noOfLayersCNN > 0  """ 
 
-    model.add(tf.keras.layers.MaxPool2D(pool_size = (3,3)))
-    if len(MyDropout) > 3 and MyDropout[3]:
-        model.add(tf.keras.layers.Dropout(MyDropout[3]))
-    
-    # Classifing by Fully Connect Neural Network
-    model.add(tf.keras.layers.Flatten())
+    for i in range(1,noOfLayersCNN):  
+        
+        if i == 1: # informing input shape
+            model.add(tf.keras.layers.Conv2D(filters=noFiltersCNN*i, kernel_size=(3,3), input_shape = inputShape, activation=hiddenActCNN, padding='same'))     
+            model.add(tf.keras.layers.MaxPooling2D(pool_size = (2, 2))) # Size of Pooling of 2x2 is default for images
+            # DO NOT DROP OUT INPUTS
+        else:
+            model.add(tf.keras.layers.Conv2D(filters=noFiltersCNN*i, kernel_size=(3,3), activation=hiddenActCNN, padding='same'))                 
+            model.add(tf.keras.layers.MaxPooling2D(pool_size = (2, 2))) # Size of Pooling of 2x2 is default for images
+            # Applying dropouts for the layer        
+            if len(dropOutsCNN) > i and dropOutsCNN[i]:
+                model.add(tf.keras.layers.Dropout(dropOutsCNN[i]))    
 
-    model.add(tf.keras.layers.Dense(128, activation='relu'))
-    if len(MyDropout) > 4 and MyDropout[4]:
-        model.add(tf.keras.layers.Dropout(MyDropout[4]))
-    
-    model.add(tf.keras.layers.Dense(10, activation='softmax'))
-    
-    ## compile CNN => not sparse_categorical_crossentropy because classes are exclusives!
-    model.compile(optimizer="adam", loss="categorical_crossentropy", metrics=["accuracy", f1_m, precision_m, recall_m])
+    # CNN output layer
+    model.add(tf.keras.layers.Conv2D(filters=noFiltersCNN * i, kernel_size=(3,3), activation=outputActCNN, padding='same'))                 
+    model.add(tf.keras.layers.MaxPooling2D(pool_size = (2, 2))) # Size of Pooling of 2x2 is default for images
+    # DO NOT DROP OUT CNN OUPUTS
 
+
+    """ Designing the Fully Connect Neural Network in case noLayersFNN > 0 """
+    
+    if noLayersFNN > 0:
+        model.add(tf.keras.layers.Flatten())
+        # DO NOT DROP OUT INPUTS
+
+    for i in range(1,noLayersFNN):  
+        model.add(tf.keras.layers.Dense(noNeuronsFNN * i, activation=hiddenActFNN))
+        if len(dropOutsFNN) > i and dropOutsFNN[i]: # Applying dropouts for the layer        
+            model.add(tf.keras.layers.Dropout(dropOutsFNN[i]))        
+    
+    model.add(tf.keras.layers.Dense(noNeuronsFNN, activation=outputActFNN))
+    # DO NOT DROP OUT FNN OUPUTS
+
+    """ Compiling the Deep Neural Network """
+    
+    model.compile(optimizer=MyOptimizer, loss=MyLoss, metrics=[myMetric, f1_m, precision_m, recall_m, fbetaprecisionskewed, fbetarecallskewed])
+
+    # Setting custom learn rate
+    if MyLearnRate > 0:
+        model.optimizer.lr = MyLearnRate
+        
     return model
+
+
 
 
 """ Function to get customised formulas for precision, recall and f1 values"""
@@ -174,6 +214,7 @@ def fbetarecallskewed(y_true, y_pred, threshold_shift=0.5):
     #def log loss 
     #log_loss= log_loss(y_test,y_train)
     #return log_loss
+    
 
 
 
