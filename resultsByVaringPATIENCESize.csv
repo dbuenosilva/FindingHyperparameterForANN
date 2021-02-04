@@ -1,0 +1,6 @@
+10000.0,0.2,42,9,3,32800,relu,relu,[],2,110,relu,softmax,[],128,0.01,0,accuracy,adam,0,categorical_crossentropy,2.3028350662231447,0.0933,0.0,0.0,0.0,nan,nan
+10000.0,0.2,42,9,3,32800,relu,relu,[],2,110,relu,softmax,[],128,0.01,1,accuracy,adam,0,categorical_crossentropy,1.4276026802062989,0.4662,0.31090048,0.67501485,0.20497204,0.61583006,0.23714781
+10000.0,0.2,42,9,3,32800,relu,relu,[],2,110,relu,softmax,[],128,0.01,2,accuracy,adam,0,categorical_crossentropy,1.4285806482315064,0.4813,0.37126747,0.6964969,0.2564896,0.6501058,0.2924752
+10000.0,0.2,42,9,3,32800,relu,relu,[],2,110,relu,softmax,[],128,0.01,3,accuracy,adam,0,categorical_crossentropy,1.6144814662933349,0.3714,0.12585554,0.59781194,0.07198483,nan,nan
+10000.0,0.2,42,9,3,32800,relu,relu,[],2,110,relu,softmax,[],128,0.01,4,accuracy,adam,0,categorical_crossentropy,2.3029071018218996,0.0933,0.0,0.0,0.0,nan,nan
+10000.0,0.2,42,9,3,32800,relu,relu,[],2,110,relu,softmax,[],128,0.01,5,accuracy,adam,0,categorical_crossentropy,1.859820482635498,0.2156,0.0034739422,0.054313093,0.0017971246,nan,nan
