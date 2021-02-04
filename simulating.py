@@ -24,40 +24,40 @@ from functions import *
 
 # Change the name of the file if you want to see separately
 
-resultsFile   = "resultsByVaringbatchSize.csv"
+resultsFile   = "resultsByVarinOUTPUT_ACTIVATIONS_FNN.csv"
 
 ## You can define any array with possible values and run
 
-batchSizeToSimulate = [16,32,64,96]
+outputACTFNNSizeToSimulate = ['softmax', 'sigmoid', 'relu']  
 
 
 # Change the loop and the attribution, in this case on line 42 to check results
 
-for attempt in range(0,len(batchSizeToSimulate)):
+for attempt in range(0,len(outputACTFNNSizeToSimulate)):
     
-    print("\nSimulating with batch size " + str(batchSizeToSimulate[attempt]) + "...\n")
+    print("\nSimulating with OUTPUT_ACTIVATIONS_FNN size " + str(outputACTFNNSizeToSimulate[attempt]) + "...\n")
   
     # Setting Hyperparameters
-    noOfEpochs  = 1   # define number of epochs to execute
-    myBatchSze  = batchSizeToSimulate[attempt]  # size of each batch in interaction to get an epoch
+    noOfEpochs  = 9   # define number of epochs to execute
+    myBatchSze  = 128  # size of each batch in interaction to get an epoch
     myTestSize  = 0.2 # how much have to be split for testing
     noOfFiles   = 5   # number of batch files to process
-    myMinDelta  = 0.05# minimum improvement rate for do not early stop
+    myMinDelta  = 0.01 # minimum improvement rate for do not early stop
     myPatience  = 2   # how many epochs run with improvement lower than myMinDelta 
     MyRandomSt  = 42  # random state for shuffling the data
     myMetric    = "accuracy" # type of metrics used 
     MyOptimizer = "adam"
     MyLoss      = "categorical_crossentropy"
     MyLearnRate = 0 # 0 value will keep default. Eg. adam => 0.001 
-    noLayersCNN = 3
+    noLayersCNN = 4
     noFiltersCNN= 32 # it will increase by plus 32 for each hidden layer
-    hiddenActCNN= 'relu'
-    outputActCNN= 'relu'
+    hiddenActCNN= 'tanh'  #'relu'
+    outputActCNN= 'softmax' #'relu'
     dropOutsCNN = []
     noLayersFNN = 2
     noNeuronsFNN= 10 # output layer. It will multly for each hidden layer 
     hiddenActFNN= 'relu'
-    outputActFNN= 'softmax'
+    outputActFNN= outputACTFNNSizeToSimulate[attempt] #'softmax'
     dropOutsFNN = []
     
     
@@ -93,24 +93,24 @@ resultsDf.columns = [
 "TRAINING_SIZE", "TEST_SIZE", "RANDOM_STATE", "N_EPOCHS", "N_LAYERS_CNN",
 "TOTAL_FILTERS_CNN", "HIDDEN_ACTIVATIONS_CNN", "OUTPUT_ACTIVATION_CNN",
 "LIST_OF_DROPOUTS_CNN", "N_LAYERS_FNN" , "TOTAL_NEURONS_FNN", 
-"HIDDEN_ACTIVATIONS_CNN" , "OUTPUT_ACTIVATIONS_CNN", "DROPOUTS_FNN",
+"HIDDEN_ACTIVATIONS_FNN" , "OUTPUT_ACTIVATIONS_FNN", "DROPOUTS_FNN",
 "BATCHSIZE", "MINDELTA" , "PATIENCE" , "METRIC" ,  "OPTMIZER",
 "LEARN_RATE", "TYPE_OF_LOSS" ,  "LOSS_VALUE" , "ACCURACY", "F1_SCORE" , 
 "PRECISION", "RECALL" , "F-BETA02", "F-BETA2"]
 
-resultsDf = resultsDf.astype({"BATCHSIZE": float})
+resultsDf = resultsDf.astype({"OUTPUT_ACTIVATIONS_FNN": float})
     
 # Define llenDf colours 
 jet = plt.get_cmap('jet')
 colors = iter(jet(np.linspace(0,1,len(resultsDf.index))))
 
-plt.title('Comparision Accuracy vs Batch size')    
-plt.xlabel("Batch Size") 
+plt.title('Comparision Accuracy vs OUTPUT_ACTIVATIONS_FNN')    
+plt.xlabel("OUTPUT_ACTIVATIONS_FNN") 
 plt.ylabel("Accuracy" )
 
 for index, row in resultsDf.iterrows():
    # Plotting values in different colours
-   plt.scatter(row["BATCHSIZE"],row["ACCURACY"], color= next(colors) )
+   plt.scatter(row["OUTPUT_ACTIVATIONS_FNN"],row["ACCURACY"], color= next(colors) )
 
 plt.show()
         
