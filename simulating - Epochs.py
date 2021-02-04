@@ -24,11 +24,11 @@ from functions import *
 
 # Change the name of the file if you want to see separately
 
-resultsFile   = "resultsByVaringbatchSize.csv"
+resultsFile   = "resultsByVaryingEpochs.csv"
 
 ## You can define any array with possible values and run
 
-epochSizeToSimulate = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,25,30,35,40,45,50,60,70,80,90,100]
+epochSizeToSimulate = [1,2,3,4,5,6,7,8,9,10,11,12,15,20,30,40,50]
 
 
 # Change the loop and the attribution, in this case on line 41 to check results
@@ -98,19 +98,19 @@ resultsDf.columns = [
 "LEARN_RATE", "TYPE_OF_LOSS" ,  "LOSS_VALUE" , "ACCURACY", "F1_SCORE" , 
 "PRECISION", "RECALL" , "F-BETA02", "F-BETA2"]
 
-resultsDf = resultsDf.astype({"BATCHSIZE": float})
+resultsDf = resultsDf.astype({"N_EPOCHS": float})
     
 # Define llenDf colours 
 jet = plt.get_cmap('jet')
 colors = iter(jet(np.linspace(0,1,len(resultsDf.index))))
 
-plt.title('Comparision Accuracy vs Batch size')    
-plt.xlabel("Batch Size") 
+plt.title('Comparision Accuracy vs Epochs')    
+plt.xlabel("Epochs") 
 plt.ylabel("Accuracy" )
 
 for index, row in resultsDf.iterrows():
    # Plotting values in different colours
-   plt.scatter(row["BATCHSIZE"],row["ACCURACY"], color= next(colors) )
+   plt.scatter(row["N_EPOCHS"],row["ACCURACY"], color= next(colors) )
 
 plt.show()
         
