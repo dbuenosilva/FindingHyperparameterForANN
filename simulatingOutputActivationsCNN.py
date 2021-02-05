@@ -24,8 +24,8 @@ from functions import *
 resultsFile   = "resultsByVaringCNNOutput.csv"
 
 ## You can define any array with possible values and run
+valuesToSimulate = ["relu"]
 
-valuesToSimulate = ["softmax","relu"]   
 
 # Change the loop and the attribution, in this case on line 42 to check results
 

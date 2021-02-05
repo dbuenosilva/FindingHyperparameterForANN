@@ -22,9 +22,9 @@ from functions import *
 #csvFile = "resultsByVaringTestSize.csv"
 #csvFile = "resultsByVaringPATIENCESize.csv"
 #csvFile = "resultsByVarinNoofLayersCNNSize.csv"
-csvFile = "resultsByVarinHIDDEN_ACTIVATIONS_FNN.csv"
+#csvFile = "resultsByVarinHIDDEN_ACTIVATIONS_FNN.csv"
 #csvFile = "resultsByVarinNoofHIDDEN_ACTIVATIONS_CNN.csv"
-#csvFile = "resultsByVarinNoofOUTPUT_ACTIVATION_CNN.csv"
+csvFile = "resultsByVarinNoofOUTPUT_ACTIVATION_CNN.csv"
 #csvFile = "resultsByVarinOUTPUT_ACTIVATIONS_FNN.csv"
 
 """
@@ -49,6 +49,6 @@ csvFile = "resultsByVarinHIDDEN_ACTIVATIONS_FNN.csv"
     
 """ Bar chart chart between one numerical colunm and categorical column """
 
-plotBarChatResultsComparisson(path + csvFile,"HIDDEN_ACTIVATIONS_FNN","ACCURACY",
-                           "Activation Function FNN", "Accuracy")
+plotBarChatResultsComparisson(path + csvFile,"OUTPUT_ACTIVATION_CNN","ACCURACY",
+                           "Output Activation Function CNN", "Accuracy")
 

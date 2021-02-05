@@ -1,4 +1,4 @@
 10000,0.2,42,9,4,1048608,tanh,softmax,[],2,110,relu,softmax,[],128,0.01,2,accuracy,adam,0,categorical_crossentropy,1.152427078,0.597,0.57551867,0.7267958,0.4794329,0.71200454,0.5134534
 10000,0.2,42,9,4,1048608,tanh,sigmoid,[],2,110,relu,softmax,[],128,0.01,2,accuracy,adam,0,categorical_crossentropy,2.30279146,0.0933,0,0,0,nan,nan
-10000,0.2,42,9,4,1048608,tanh,relu,[],2,110,relu,softmax,[],128,0.01,2,accuracy,adam,0,categorical_crossentropy,1.316418654,0.5507,0.5345018,0.68877655,0.43989617,0.67336595,0.47311884
 10000,0.2,42,9,4,1048608,tanh,softmax,[],2,110,relu,softmax,[],128,0.01,2,accuracy,adam,0,categorical_crossentropy,1.152427078,0.597,0.57551867,0.7267958,0.4794329,0.71200454,0.5134534
+12500,0.25,42,9,4,1048608,relu,relu,[],5,100010,relu,softmax,[],128,0.01,2,accuracy,adam,0,categorical_crossentropy,1.218016148,0.59920001,0.586556375,0.687763572,0.513347208,0.678576529,0.540118396
