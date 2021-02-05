@@ -215,6 +215,9 @@ def findingTheBestHyperparameters(resultsFile,
     print('F- Beta (0.2) Score: ', fbetaprecisionskewed)
     print('F- Beta (2) Score: ', fbetarecallskewed)
     
+    
+    """ Saving results to csv file for analyse"""
+    
     #
     # Results file layout:
     #
@@ -270,7 +273,6 @@ def findingTheBestHyperparameters(resultsFile,
     contend += "," + str(fbetarecallskewed) 
     contend += "\n"
     
-    # Saving results to csv file for future analyse
     saveToFile(myResults, contend)
     
     # Predicting aleatory sample from 0 to 10,000 (test set has 10,000 instances)

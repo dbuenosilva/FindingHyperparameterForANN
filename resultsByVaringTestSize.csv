@@ -1,0 +1,11 @@
+7500,0.15,42,33,3,32800,relu,relu,[],2,110,relu,softmax,[],96,0.05,2,accuracy,adam,0,categorical_crossentropy,1.649182519,0.36426666,0.15683317,0.63421756,0.091755316,nan,nan
+8000,0.16,42,33,3,32800,relu,relu,[],2,110,relu,softmax,[],96,0.05,2,accuracy,adam,0,categorical_crossentropy,1.27614312,0.532875,0.47043326,0.72168726,0.352875,0.6919496,0.39177614
+8500,0.17,42,33,3,32800,relu,relu,[],2,110,relu,softmax,[],96,0.05,2,accuracy,adam,0,categorical_crossentropy,1.604442568,0.36294118,0.24433874,0.691105,0.15117481,0.59737545,0.17827232
+9000,0.18,42,33,3,32800,relu,relu,[],2,110,relu,softmax,[],96,0.05,2,accuracy,adam,0,categorical_crossentropy,1.471366108,0.45511112,0.36368826,0.67617357,0.25243795,0.63184917,0.2873924
+9500,0.19,42,33,3,32800,relu,relu,[],2,110,relu,softmax,[],96,0.05,2,accuracy,adam,0,categorical_crossentropy,1.265278653,0.5534737,0.5001415,0.7320872,0.38344756,0.7059585,0.4226255
+10000,0.2,42,33,3,32800,relu,relu,[],2,110,relu,softmax,[],96,0.05,2,accuracy,adam,0,categorical_crossentropy,2.30289203,0.0933,0,0,0,nan,nan
+10500,0.21,42,33,3,32800,relu,relu,[],2,110,relu,softmax,[],96,0.05,2,accuracy,adam,0,categorical_crossentropy,1.659553424,0.33638096,0.1741999,0.6533693,0.103343464,nan,nan
+11000,0.22,42,33,3,32800,relu,relu,[],2,110,relu,softmax,[],96,0.05,2,accuracy,adam,0,categorical_crossentropy,1.340880537,0.511,0.4302472,0.7188879,0.3113493,0.6817146,0.34973082
+11500,0.23,42,33,3,32800,relu,relu,[],2,110,relu,softmax,[],96,0.05,2,accuracy,adam,0,categorical_crossentropy,1.95317701,0.20295653,0,0,0,nan,nan
+12000,0.24,42,33,3,32800,relu,relu,[],2,110,relu,softmax,[],96,0.05,2,accuracy,adam,0,categorical_crossentropy,1.270544787,0.54483336,0.49395186,0.7328839,0.37633333,0.70557547,0.4156461
+12500,0.25,42,33,3,32800,relu,relu,[],2,110,relu,softmax,[],96,0.05,2,accuracy,adam,0,categorical_crossentropy,1.257093407,0.55504,0.49222696,0.7179842,0.378133,0.692626,0.41647568

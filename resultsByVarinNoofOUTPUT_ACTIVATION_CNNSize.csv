@@ -1,3 +1,0 @@
-10000.0,0.2,42,9,4,1048608,tanh,softmax,[],2,110,relu,softmax,[],128,0.01,2,accuracy,adam,0,categorical_crossentropy,1.1524270780563355,0.597,0.57551867,0.7267958,0.4794329,0.71200454,0.5134534
-10000.0,0.2,42,9,4,1048608,tanh,sigmoid,[],2,110,relu,softmax,[],128,0.01,2,accuracy,adam,0,categorical_crossentropy,2.302791459655762,0.0933,0.0,0.0,0.0,nan,nan
-10000.0,0.2,42,9,4,1048608,tanh,relu,[],2,110,relu,softmax,[],128,0.01,2,accuracy,adam,0,categorical_crossentropy,1.316418653869629,0.5507,0.5345018,0.68877655,0.43989617,0.67336595,0.47311884

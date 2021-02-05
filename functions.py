@@ -14,6 +14,7 @@ General functions used for training and deploying anamalies detection program
 
 import pickle
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import tensorflow as tf # using Tensorflow 2.4
 from tensorflow.keras import backend as K
@@ -144,7 +145,8 @@ def getMyModel(inputShape,
         # DO NOT DROP OUT INPUTS
 
     for i in range(1,noLayersFNN):  
-        model.add(tf.keras.layers.Dense(noNeuronsFNN * i, activation=hiddenActFNN))
+        model.add(tf.keras.layers.Dense(noNeuronsFNN * 10 * (noLayersFNN + 1 - i), activation=hiddenActFNN))
+        print("No Neurons in layer " + str(i) + ": ", noNeuronsFNN * 10 * (noLayersFNN + 1 - i) )
         if len(dropOutsFNN) > i and dropOutsFNN[i]: # Applying dropouts for the layer        
             model.add(tf.keras.layers.Dropout(dropOutsFNN[i]))        
     
@@ -241,23 +243,87 @@ def printImage(imageArray):
 
 
 
-""" Function plotChatEpochsVsMetris(   )
+""" Function plotScatterChatResultsComparisson(   )
 
-    Plet a chat showing Epochs versus Metris
+    Plot a chart showing Hyperparameters versus its performance
     
-    parameters:
+    parameters: results - results CSV file
+                x - column name of x axis
+                y - column name of values of y axis
+                title - title of the chart
+                xLabel - description of label x
+                yLabel - description of label y
 
     return: 
         none
     
 """
-def plotChatEpochsVsMetris(epochs,acc_val, f1_score,precision,recall):
+def plotScatterChatResultsComparisson(results,x,y,xLabel, yLabel):
     
-    plt.plot(epochs, acc_val)
-    plt.plot(epochs, f1_score)
-    plt.plot(epochs, precision)
-    plt.plot(epochs, recall)
+    # reading the results and plot the comparison with accuracy
+    resultsDf = pd.read_csv(results)
+    
+    resultsDf.columns = [
+    "TRAINING_SIZE", "TEST_SIZE", "RANDOM_STATE", "N_EPOCHS", "N_LAYERS_CNN",
+    "TOTAL_FILTERS_CNN", "HIDDEN_ACTIVATIONS_CNN", "OUTPUT_ACTIVATION_CNN",
+    "LIST_OF_DROPOUTS_CNN", "N_LAYERS_FNN" , "TOTAL_NEURONS_FNN", 
+    "HIDDEN_ACTIVATIONS_FNN" , "OUTPUT_ACTIVATIONS_FNN", "DROPOUTS_FNN",
+    "BATCHSIZE", "MINDELTA" , "PATIENCE" , "METRIC" ,  "OPTMIZER",
+    "LEARN_RATE", "TYPE_OF_LOSS" ,  "LOSS_VALUE" , "ACCURACY", "F1_SCORE" , 
+    "PRECISION", "RECALL" , "F-BETA02", "F-BETA2"]
+        
+    # Define llenDf colours 
+    jet = plt.get_cmap('jet')
+    colors = iter(jet(np.linspace(0,1,len(resultsDf.index))))
+    
+    plt.title('Comparision ' + yLabel + ' vs ' + xLabel)    
+    plt.xlabel(xLabel) 
+    plt.ylabel(yLabel)
+    
+    for index, row in resultsDf.iterrows():
+       # Plotting values in different colours
+       plt.scatter(row[x],row[y], color= next(colors) )
+    
     plt.show()
+            
+
+""" Function plotBarChatResultsComparisson(   )
+
+    Plot a bar chart showing categorical Hyperparameters versus its performance
+    
+    parameters: results - results CSV file
+                x_names - array with column of category names of x axis
+                y - column name of values of y axis
+                title - title of the chart
+                xLabel - description of label x
+                yLabel - description of label y
+
+    return: 
+        none
+    
+"""
+def plotBarChatResultsComparisson(results,x,y,xLabel, yLabel):
+
+    # reading the results and plot the comparison with accuracy
+    resultsDf = pd.read_csv(results)
+    
+    resultsDf.columns = [
+    "TRAINING_SIZE", "TEST_SIZE", "RANDOM_STATE", "N_EPOCHS", "N_LAYERS_CNN",
+    "TOTAL_FILTERS_CNN", "HIDDEN_ACTIVATIONS_CNN", "OUTPUT_ACTIVATION_CNN",
+    "LIST_OF_DROPOUTS_CNN", "N_LAYERS_FNN" , "TOTAL_NEURONS_FNN", 
+    "HIDDEN_ACTIVATIONS_FNN" , "OUTPUT_ACTIVATIONS_FNN", "DROPOUTS_FNN",
+    "BATCHSIZE", "MINDELTA" , "PATIENCE" , "METRIC" ,  "OPTMIZER",
+    "LEARN_RATE", "TYPE_OF_LOSS" ,  "LOSS_VALUE" , "ACCURACY", "F1_SCORE" , 
+    "PRECISION", "RECALL" , "F-BETA02", "F-BETA2"]
+
+    x_pos = [i for i, _ in enumerate(resultsDf[x])]
+    plt.xticks(x_pos, resultsDf[x])
+    plt.bar(x_pos, resultsDf[y], color='green')         
+    plt.title('Comparision ' + yLabel + ' vs ' + xLabel)    
+    plt.xlabel(xLabel) 
+    plt.ylabel(yLabel)        
+    plt.show()
+    
     
 
 
@@ -280,6 +346,5 @@ def saveToFile(file , contend ):
     except:
         print("\nError to save contend " + contend + " to file " + file + "!" )
 
-    
 
 

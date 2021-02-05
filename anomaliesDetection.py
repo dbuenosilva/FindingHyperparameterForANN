@@ -32,11 +32,11 @@ y           = [] # array with labels (index of category of images)
 myModelFile = path + "anomaliesDetectionModel.h5" # file to save trained model
 
 # Setting Hyperparameters
-noOfEpochs  = 1   # define number of epochs to execute
-myBatchSze  = 32  # size of each batch in interaction to get an epoch
-myTestSize  = 0.2 # how much have to be split for testing
+noOfEpochs  = 9   # define number of epochs to execute
+myBatchSze  = 128 # size of each batch in interaction to get an epoch
+myTestSize  = 0.25# how much have to be split for testing
 noOfFiles   = 5   # number of batch files to process
-myMinDelta  = 0.05# minimum improvement rate for do not early stop
+myMinDelta  = 0.01# minimum improvement rate for do not early stop
 myPatience  = 2   # how many epochs run with improvement lower than myMinDelta 
 MyRandomSt  = 42  # random state for shuffling the data
 myMetric    = "accuracy" # type of metric used for training
@@ -160,12 +160,16 @@ model.add(tf.keras.layers.MaxPool2D(pool_size = (2,2)))
 
 model.add(tf.keras.layers.Conv2D(filters=128, kernel_size=(3,3), activation='relu', padding='same'))
 model.add(tf.keras.layers.MaxPool2D(pool_size = (2,2)))
-#model.add(tf.keras.layers.Dropout(0.4))
+#model.add(tf.keras.layers.Dropout(0.25))
 
 
 # designing by Fully Connect Neural Network
 model.add(tf.keras.layers.Flatten())
-model.add(tf.keras.layers.Dense(160, activation='relu'))    
+model.add(tf.keras.layers.Dense(60, activation='relu'))    
+model.add(tf.keras.layers.Dense(50, activation='relu'))    
+model.add(tf.keras.layers.Dense(40, activation='relu'))    
+model.add(tf.keras.layers.Dense(30, activation='relu'))    
+model.add(tf.keras.layers.Dense(20, activation='relu'))    
 model.add(tf.keras.layers.Dense(10, activation='softmax'))
     
 ## compile DNN => not sparse_categorical_crossentropy because classes are exclusives!

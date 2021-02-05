@@ -28,14 +28,14 @@ resultsFile   = "resultsByVaringbatchSize.csv"
 
 ## You can define any array with possible values and run
 
-batchSizeToSimulate = [128]  
+batchSizeToSimulate = [96]  
 
 
 # Change the loop and the attribution, in this case on line 42 to check results
 
-for attempt in range(0,len(outputACTFNNSizeToSimulate)):
+for attempt in range(0,len(batchSizeToSimulate)):
     
-    print("\nSimulating with OUTPUT_ACTIVATIONS_FNN size " + str(outputACTFNNSizeToSimulate[attempt]) + "...\n")
+    print("\nSimulating with batch size " + str(batchSizeToSimulate[attempt]) + "...\n")
   
     # Setting Hyperparameters
     noOfEpochs  = 9   # define number of epochs to execute
@@ -51,11 +51,11 @@ for attempt in range(0,len(outputACTFNNSizeToSimulate)):
     MyLearnRate = 0 # 0 value will keep default. Eg. adam => 0.001 
     noLayersCNN = 4
     noFiltersCNN= 32 # it will increase by plus 32 for each hidden layer
-    hiddenActCNN= 'tanh'  #'relu'
+    hiddenActCNN= 'relu'  #
     outputActCNN= 'softmax' #'relu'
     dropOutsCNN = []
     noLayersFNN = 2
-    noNeuronsFNN= 10 # output layer. It will multly for each hidden layer 
+    noNeuronsFNN= 10 # output layer. It will multly for each hidden layer  
     hiddenActFNN= 'relu'
     outputActFNN= 'softmax'
     dropOutsFNN = []
@@ -97,20 +97,18 @@ resultsDf.columns = [
 "BATCHSIZE", "MINDELTA" , "PATIENCE" , "METRIC" ,  "OPTMIZER",
 "LEARN_RATE", "TYPE_OF_LOSS" ,  "LOSS_VALUE" , "ACCURACY", "F1_SCORE" , 
 "PRECISION", "RECALL" , "F-BETA02", "F-BETA2"]
-
-resultsDf = resultsDf.astype({"OUTPUT_ACTIVATIONS_FNN": float})
     
 # Define llenDf colours 
 jet = plt.get_cmap('jet')
 colors = iter(jet(np.linspace(0,1,len(resultsDf.index))))
 
-plt.title('Comparision Accuracy vs OUTPUT_ACTIVATIONS_FNN')    
-plt.xlabel("OUTPUT_ACTIVATIONS_FNN") 
+plt.title('Comparision Accuracy vs Batch Size')    
+plt.xlabel("Batch Size") 
 plt.ylabel("Accuracy" )
 
 for index, row in resultsDf.iterrows():
    # Plotting values in different colours
-   plt.scatter(row["OUTPUT_ACTIVATIONS_FNN"],row["ACCURACY"], color= next(colors) )
+   plt.scatter(row["BATCHSIZE"],row["ACCURACY"], color= next(colors) )
 
 plt.show()
         
