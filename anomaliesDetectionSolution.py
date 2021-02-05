@@ -157,21 +157,19 @@ model.add(tf.keras.layers.MaxPool2D(pool_size = (2,2)))
 
 model.add(tf.keras.layers.Conv2D(filters=96, kernel_size=(3,3), activation='relu', padding='same'))
 model.add(tf.keras.layers.MaxPool2D(pool_size = (2,2)))
-#model.add(tf.keras.layers.Dropout(0.4))
+model.add(tf.keras.layers.Dropout(0.4))
 
 model.add(tf.keras.layers.Conv2D(filters=128, kernel_size=(3,3), activation='relu', padding='same'))
 model.add(tf.keras.layers.MaxPool2D(pool_size = (2,2)))
-#model.add(tf.keras.layers.Dropout(0.25))
+#model.add(tf.keras.layers.Dropout(0.5))
 
 
 # designing by Fully Connect Neural Network
 model.add(tf.keras.layers.Flatten())
-model.add(tf.keras.layers.Dense(512, activation='relu'))    
 model.add(tf.keras.layers.Dense(256, activation='relu'))    
 model.add(tf.keras.layers.Dense(128, activation='relu'))    
 model.add(tf.keras.layers.Dense(64, activation='relu'))    
 model.add(tf.keras.layers.Dense(32, activation='relu'))   
- 
 model.add(tf.keras.layers.Dense(10, activation='softmax'))
     
 ## compile DNN => not sparse_categorical_crossentropy because classes are exclusives!
@@ -187,6 +185,7 @@ model.fit(x_trainNormalised, y_trainCategorical, epochs=noOfEpochs, batch_size=m
 ## evaluating the accuracy using test data
 loss_val, acc_val, f1_score, precision, recall, fbetaprecisionskewed, fbetarecallskewed = model.evaluate(x_testNormalised, y_testCategorical)
 print('\n\nAccuracy: ', acc_val)
+print('Loss: ', loss_val)
 print('F1 Score: ', f1_score)
 print('Precision: ', precision)
 print('Recall: ', recall)

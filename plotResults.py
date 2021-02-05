@@ -24,8 +24,11 @@ from functions import *
 #csvFile = "resultsByVarinNoofLayersCNNSize.csv"
 #csvFile = "resultsByVarinHIDDEN_ACTIVATIONS_FNN.csv"
 #csvFile = "resultsByVarinNoofHIDDEN_ACTIVATIONS_CNN.csv"
-csvFile = "resultsByVarinNoofOUTPUT_ACTIVATION_CNN.csv"
+#csvFile = "resultsByVarinNoofOUTPUT_ACTIVATION_CNN.csv"
 #csvFile = "resultsByVarinOUTPUT_ACTIVATIONS_FNN.csv"
+csvFile = "resultsByVaryingEpochs.csv"
+#csvFile = "bestSolution.csv"
+
 
 """
     Change the labels and colunm names
@@ -43,12 +46,12 @@ csvFile = "resultsByVarinNoofOUTPUT_ACTIVATION_CNN.csv"
 """
 
 """ Scartter chart between two numerical colunms """
-#plotScatterChatResultsComparisson(path + csvFile,"N_LAYERS_CNN","ACCURACY",
-#                           "No Layers CNN", "Accuracy")
+plotScatterChatResultsComparisson(path + csvFile,"LOSS_VALUE","ACCURACY",
+                           "Loss", "Accuracy")
 
     
 """ Bar chart chart between one numerical colunm and categorical column """
 
-plotBarChatResultsComparisson(path + csvFile,"OUTPUT_ACTIVATION_CNN","ACCURACY",
-                           "Output Activation Function CNN", "Accuracy")
+#plotBarChatResultsComparisson(path + csvFile,"OUTPUT_ACTIVATION_CNN","ACCURACY",
+#                           "Output Activation Function CNN", "Accuracy")
 
