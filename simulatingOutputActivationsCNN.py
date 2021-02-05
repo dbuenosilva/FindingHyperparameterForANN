@@ -21,36 +21,36 @@ from functions import *
 
 # Change the name of the file if you want to see separately
 
-resultsFile   = "resultsByVaringCNNOutput.csv"
+resultsFile   = "resultsByVaringOPTMIZERSize.csv"
 
 ## You can define any array with possible values and run
-valuesToSimulate = ["relu"]
+valuesToSimulate = ['RMSprop', 'Adagrad', 'Adadelta', 'Adamax', 'Nadam']
 
 
 # Change the loop and the attribution, in this case on line 42 to check results
 
 for attempt in range(0,len(valuesToSimulate)):
     
-    print("\nSimulating with activation CNN " + str(valuesToSimulate[attempt]) + "...\n")
+    print("\nSimulating with optmiser " + str(valuesToSimulate[attempt]) + "...\n")
   
     # Setting Hyperparameters
     noOfEpochs  = 9   # define number of epochs to execute
-    myBatchSze  = 128 # size of each batch in interaction to get an epoch
-    myTestSize  = 0.25# how much have to be split for testing
+    myBatchSze  = 96  # size of each batch in interaction to get an epoch
+    myTestSize  = 0.2 # how much have to be split for testing
     noOfFiles   = 5   # number of batch files to process
     myMinDelta  = 0.01 # minimum improvement rate for do not early stop
     myPatience  = 2   # how many epochs run with improvement lower than myMinDelta 
     MyRandomSt  = 42  # random state for shuffling the data
     myMetric    = "accuracy" # type of metrics used 
-    MyOptimizer = "adam"
+    MyOptimizer = valuesToSimulate[attempt]
     MyLoss      = "categorical_crossentropy"
     MyLearnRate = 0 # 0 value will keep default. Eg. adam => 0.001 
-    noLayersCNN = 4
+    noLayersCNN = 2
     noFiltersCNN= 32 # it will increase by plus 32 for each hidden layer
     hiddenActCNN= 'relu'  #
-    outputActCNN= valuesToSimulate[attempt]
+    outputActCNN= 'relu'
     dropOutsCNN = []
-    noLayersFNN = 5
+    noLayersFNN = 2
     noNeuronsFNN= 10 # output layer. It will multly for each hidden layer  
     hiddenActFNN= 'relu'
     outputActFNN= 'softmax'

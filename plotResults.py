@@ -26,8 +26,8 @@ from functions import *
 #csvFile = "resultsByVarinNoofHIDDEN_ACTIVATIONS_CNN.csv"
 #csvFile = "resultsByVarinNoofOUTPUT_ACTIVATION_CNN.csv"
 #csvFile = "resultsByVarinOUTPUT_ACTIVATIONS_FNN.csv"
-csvFile = "resultsByVaryingEpochs.csv"
-#csvFile = "bestSolution.csv"
+#csvFile = "resultsByVaryingEpochs.csv"
+csvFile = "bestSolution.csv"
 
 
 """
@@ -46,8 +46,8 @@ csvFile = "resultsByVaryingEpochs.csv"
 """
 
 """ Scartter chart between two numerical colunms """
-plotScatterChatResultsComparisson(path + csvFile,"LOSS_VALUE","ACCURACY",
-                           "Loss", "Accuracy")
+plotScatterChatResultsComparisson(path + csvFile,"TEST_SIZE","ACCURACY",
+                           "KFold", "Accuracy",1) # 1 plot mean; 0 dont plot
 
     
 """ Bar chart chart between one numerical colunm and categorical column """

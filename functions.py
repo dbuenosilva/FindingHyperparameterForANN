@@ -258,7 +258,7 @@ def printImage(imageArray):
         none
     
 """
-def plotScatterChatResultsComparisson(results,x,y,xLabel, yLabel):
+def plotScatterChatResultsComparisson(results,x,y,xLabel, yLabel,mean):
     
     # reading the results and plot the comparison with accuracy
     resultsDf = pd.read_csv(results)
@@ -283,6 +283,13 @@ def plotScatterChatResultsComparisson(results,x,y,xLabel, yLabel):
     for index, row in resultsDf.iterrows():
        # Plotting values in different colours
        plt.scatter(row[x],row[y], color= next(colors) )
+     
+    avg = np.mean(resultsDf[y])    
+     
+    if mean == 1:
+          # plot the ideal case in red color
+          plt.plot(resultsDf[x], [avg for _ in range(len(resultsDf[x]))], color='red')
+    
     
     plt.show()
             

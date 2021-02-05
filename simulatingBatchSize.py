@@ -28,7 +28,7 @@ resultsFile   = "resultsByVaringbatchSize.csv"
 
 ## You can define any array with possible values and run
 
-batchSizeToSimulate = [96]  
+batchSizeToSimulate = [16,32,64,96,128]  
 
 
 # Change the loop and the attribution, in this case on line 42 to check results

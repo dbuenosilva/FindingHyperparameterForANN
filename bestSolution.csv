@@ -2,3 +2,9 @@
 50000,3,42,0.25,4,32,relu,relu,,5,10,relu,softmax,,128,0.01,2,accuracy,adam,0,categorical_crossentropy,1.1508440971374512,0.5961999893188477,0,0,0,0,0
 50000,4,42,0.25,4,32,relu,relu,,5,10,relu,softmax,,128,0.01,2,accuracy,adam,0,categorical_crossentropy,1.1445245742797852,0.6064000129699707,0,0,0,0,0
 50000,5,42,0.25,4,32,relu,relu,,5,10,relu,softmax,,128,0.01,2,accuracy,adam,0,categorical_crossentropy,1.1662814617156982,0.6093999743461609,0,0,0,0,0
+50000,6,42,0.25,4,32,relu,relu,,5,10,relu,softmax,,128,0.01,2,accuracy,adam,0,categorical_crossentropy,1.1358002424240112,0.6194000244140625,0,0,0,0,0
+50000,7,42,0.25,4,32,relu,relu,,5,10,relu,softmax,,128,0.01,2,accuracy,adam,0,categorical_crossentropy,1.1542329788208008,0.6065999865531921,0,0,0,0,0
+50000,8,42,0.25,4,32,relu,relu,,5,10,relu,softmax,,128,0.01,2,accuracy,adam,0,categorical_crossentropy,1.1063170433044434,0.6248000264167786,0,0,0,0,0
+50000,9,42,0.25,4,32,relu,relu,,5,10,relu,softmax,,128,0.01,2,accuracy,adam,0,categorical_crossentropy,1.1931349039077759,0.5835999846458435,0,0,0,0,0
+50000,10,42,0.25,4,32,relu,relu,,5,10,relu,softmax,,128,0.01,2,accuracy,adam,0,categorical_crossentropy,1.1861960887908936,0.5916000008583069,0,0,0,0,0
+50000,11,42,0.25,4,32,relu,relu,,5,10,relu,softmax,,128,0.01,2,accuracy,adam,0,categorical_crossentropy,1.1682385206222534,0.5942000150680542,0,0,0,0,0
