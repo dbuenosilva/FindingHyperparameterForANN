@@ -29,12 +29,12 @@ data        = [] # array with all list of images read from batch files
 X           = [] # array with images data including channels (RGB)
 y           = [] # array with labels (index of category of images)
 myModelFile = path + "anomaliesDetectionModel.h5" # file to save trained model
-myResults   = path + "bestSolution.csv" 
+myResults   = path + "3kfoldera.csv" 
 
 # Setting Hyperparameters
-noOfEpochs  = 9   # define number of epochs to execute
+noOfEpochs  = 20  # define number of epochs to execute
 myBatchSze  = 128 # size of each batch in interaction to get an epoch
-myTestSize  = 0.25# how much have to be split for testing
+myTestSize  = 0.20# how much have to be split for testing
 noOfFiles   = 5   # number of batch files to process
 myMinDelta  = 0.01# minimum improvement rate for do not early stop
 myPatience  = 2   # how many epochs run with improvement lower than myMinDelta 
@@ -42,7 +42,7 @@ MyRandomSt  = 42  # random state for shuffling the data
 myMetric    = "accuracy" # type of metric used for training
 MyOptimizer = "adam"
 MyLoss      = "categorical_crossentropy"
-MyNumKfolds = 10
+MyNumKfolds = 3
 totalAcc    = []
 totalLoss   = []
     
@@ -143,21 +143,21 @@ for train, test in kfold.split(x_Normalised, y_categorical):
     model.add(tf.keras.layers.MaxPool2D(pool_size = (2,2)))
     #model.add(tf.keras.layers.Dropout(0.5)) 
     
-    model.add(tf.keras.layers.Conv2D(filters=96, kernel_size=(3,3), activation='relu', padding='same'))
-    model.add(tf.keras.layers.MaxPool2D(pool_size = (2,2)))
+#    model.add(tf.keras.layers.Conv2D(filters=96, kernel_size=(3,3), activation='relu', padding='same'))
+#    model.add(tf.keras.layers.MaxPool2D(pool_size = (2,2)))
     #model.add(tf.keras.layers.Dropout(0.4))
     
-    model.add(tf.keras.layers.Conv2D(filters=128, kernel_size=(3,3), activation='relu', padding='same'))
-    model.add(tf.keras.layers.MaxPool2D(pool_size = (2,2)))
+#    model.add(tf.keras.layers.Conv2D(filters=128, kernel_size=(3,3), activation='relu', padding='same'))
+#    model.add(tf.keras.layers.MaxPool2D(pool_size = (2,2)))
     #model.add(tf.keras.layers.Dropout(0.5))
     
     
     # designing by Fully Connect Neural Network
     model.add(tf.keras.layers.Flatten())
-    model.add(tf.keras.layers.Dense(256, activation='relu'))    
-    model.add(tf.keras.layers.Dense(128, activation='relu'))    
-    model.add(tf.keras.layers.Dense(64, activation='relu'))    
-    model.add(tf.keras.layers.Dense(32, activation='relu'))   
+#    model.add(tf.keras.layers.Dense(256, activation='relu'))    
+#    model.add(tf.keras.layers.Dense(128, activation='relu'))    
+    model.add(tf.keras.layers.Dense(32, activation='relu'))    
+    model.add(tf.keras.layers.Dense(16, activation='relu'))   
     model.add(tf.keras.layers.Dense(10, activation='softmax'))
         
     ## compile DNN => not sparse_categorical_crossentropy because classes are exclusives!
